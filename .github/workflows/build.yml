@@ -2,9 +2,9 @@ name: Build Check
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
 
 jobs:
   build:
@@ -15,17 +15,22 @@ jobs:
         node-version: [20.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run build
-      run: npm run build
+      - name: Run build
+        run: npm run build
+        env:
+          AUTH_SECRET: "build-time-secret-placeholder"
+          AUTH_DISCORD_ID: "build-discord-id-placeholder"
+          AUTH_DISCORD_SECRET: "build-discord-secret-placeholder"
+          DATABASE_URL: "postgresql://user:password@localhost:5432/db"
