@@ -14,6 +14,8 @@ const HeartParticles = () => {
             await loadHeartShape(engine); 
         }).then(() => {
             setInit(true);
+        }).catch((error) => {
+            console.error("Error initializing particles:", error);
         });
     }, []);
     
