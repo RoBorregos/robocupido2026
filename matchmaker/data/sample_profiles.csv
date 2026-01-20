@@ -1,0 +1,7 @@
+id,name,age,gender,location,interests,looking_for_gender,min_age,max_age,trait_extraversion,trait_agreeableness,trait_conscientiousness,trait_neuroticism,trait_openness
+1,Ana,28,female,Madrid,cinema|music|cooking,any,24,35,0.8,0.6,0.5,0.7,0.4
+2,Carlos,30,male,Madrid,music|football|travel,female,25,35,0.7,0.5,0.6,0.6,0.3
+3,Lucia,27,female,Barcelona,travel|cooking|art,any,24,34,0.6,0.7,0.5,0.6,0.4
+4,Diego,29,male,Madrid,cinema|music|art,female,22,32,0.75,0.55,0.6,0.65,0.35
+5,Mariana,26,female,Madrid,music|travel|yoga,male,25,33,0.65,0.6,0.4,0.7,0.5
+6,Luis,32,male,Valencia,football|travel|tech,female,25,35,0.4,0.5,0.7,0.3,0.6
