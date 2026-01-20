@@ -23,3 +23,10 @@ python -m matchmaker.matcher matchmaker/data/sample_profiles.csv --export matchm
 ```
 
 The exported CSV has columns: `id1,name1,id2,name2,score`. Singles appear with `id2`/`name2` empty.
+
+
+4. Create more profiles:
+python -m matchmaker.tools.generate_profiles --count 150 --out ../data/sample_profiles_150.csv
+
+5. Run matcher:
+python -m matchmaker.matcher matchmaker/data/sample_profiles_150.csv --export matchmaker/output/matches_150.csv --min-score 0.0
