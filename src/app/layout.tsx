@@ -7,7 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
   title: "RoboCupido | Encuentra tu match ideal",
-  description: "Conexiones que van más allá de una mirada",
+  description: "By Roborregos",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
