@@ -1,16 +1,21 @@
-import { type Session } from "next-auth";
+import { auth } from "~/server/auth";
+import Image from "next/image";
+import { Globe } from "lucide-react";
 
-interface HeaderProps {
-    session: Session | null;
-}
-
-const Header = ({ session }: HeaderProps) => {
+const Header = async () => {
+    const session = await auth();
     return (
         <div className="fixed top-0 left-0 right-0 z-50 flex justify-center py-4 md:py-6 px-4">
             <header className="flex h-14 md:h-16 w-full max-w-[960px] items-center justify-between px-4 md:px-8 transition-all duration-300">
                 <div className="flex items-center gap-2 md:gap-3 group cursor-pointer">
-                    <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full">
-                        <img src="/black_logo.png" alt="Roborregos Logo" className="h-full w-full object-contain" />
+                    <div className="relative flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full">
+                        <Image
+                            src="/black_logo.png"
+                            alt="Roborregos Logo"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
                     </div>
                     <h2 className="text-base md:text-lg font-extrabold tracking-tight text-wine transition-colors group-hover:text-primary whitespace-nowrap">
                         RoboCupido
@@ -26,7 +31,7 @@ const Header = ({ session }: HeaderProps) => {
                             className="hover:text-primary transition-all duration-300 transform hover:scale-110"
                             title="Website"
                         >
-                            <span className="material-symbols-outlined text-[20px] md:text-[22px]">public</span>
+                            <Globe className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]" />
                         </a>
                         <a
                             href="https://instagram.com/roborregos"

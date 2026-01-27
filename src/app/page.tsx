@@ -3,6 +3,7 @@ import { api, HydrateClient } from "~/trpc/server";
 import HeartParticles from "./_components/heartParticles";
 import Welcome from "./_components/welcome";
 import Header from "./_components/header";
+import { ArrowRight } from "lucide-react";
 
 export default async function Home() {
   const session = await auth();
@@ -16,7 +17,7 @@ export default async function Home() {
         </div>
 
         {/* Header/Navbar */}
-        <Header session={session} />
+        <Header />
 
         {/* Main Content */}
         <main className="relative z-10">
@@ -42,7 +43,7 @@ export default async function Home() {
               <div className="pt-6">
                 <button className="flex min-w-[220px] mx-auto items-center justify-center gap-2 rounded-full bg-primary h-14 px-8 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-all hover:translate-y-[-2px] hover:shadow-2xl active:translate-y-0">
                   Encuentra tu match
-                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                  <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
               </div>
             </div>
@@ -54,9 +55,8 @@ export default async function Home() {
           <div className="mx-auto max-w-[960px] space-y-6">
             <div className="pt-10 border-t border-primary/5">
               <p className="text-xs font-medium text-rose-dust/80">
-                Made by  <span className="text-wine font-bold">Roborregos</span><span className="text-primary">❤️</span> 
+                Made by  <span className="text-wine font-bold">Roborregos</span><span className="text-primary">❤️</span>
               </p>
-              <p className="mt-2 text-[10px] text-rose-dust/50">© 2026 Roborregos. Todos los derechos reservados.</p>
             </div>
           </div>
         </footer>
