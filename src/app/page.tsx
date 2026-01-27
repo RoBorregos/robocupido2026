@@ -21,7 +21,7 @@ export default async function Home() {
         {/* Main Content */}
         <main className="relative z-10">
           <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 text-center soft-gradient-bg pt-20">
-            <div className="mb-10 heart-glow relative">
+            <div className="mb-10 heart-glow relative z-0">
               <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full scale-75 animate-pulse"></div>
               <div className="relative flex h-24 w-24 md:h-32 md:w-32 items-center justify-center rounded-full bg-white shadow-lg shadow-primary/5 border border-primary/5 transition-transform duration-500 hover:scale-105">
                 <svg
@@ -54,7 +54,7 @@ export default async function Home() {
           <div className="mx-auto max-w-[960px] space-y-6">
             <div className="pt-10 border-t border-primary/5">
               <p className="text-xs font-medium text-rose-dust/80">
-                Made with <span className="text-primary">❤️</span> by <span className="text-wine font-bold">Roborregos</span>
+                Made by  <span className="text-wine font-bold">Roborregos</span><span className="text-primary">❤️</span> 
               </p>
               <p className="mt-2 text-[10px] text-rose-dust/50">© 2026 Roborregos. Todos los derechos reservados.</p>
             </div>
