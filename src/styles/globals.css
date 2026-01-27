@@ -32,3 +32,25 @@
 @utility premium-button-glow {
   box-shadow: 0 0 20px rgba(238, 43, 91, 0.4);
 }
+
+@utility icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@utility heart-pulse {
+  animation: heart-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes heart-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}

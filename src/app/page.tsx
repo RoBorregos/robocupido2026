@@ -21,9 +21,15 @@ export default async function Home() {
         {/* Main Content */}
         <main className="relative z-10">
           <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 text-center soft-gradient-bg pt-20">
-            <div className="mb-14 heart-glow">
-              <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-white shadow-2xl shadow-primary/5 border border-primary/5">
-                <span className="material-symbols-outlined text-[64px] text-primary select-none fill-1">favorite</span>
+            <div className="mb-14 heart-glow relative">
+              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 animate-pulse"></div>
+              <div className="relative flex h-44 w-44 items-center justify-center rounded-full bg-white shadow-[0_20px_50px_rgba(238,43,91,0.15)] border border-primary/10 transition-transform duration-500 hover:scale-110">
+                <svg
+                  className="h-24 w-24 text-primary fill-current heart-pulse"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
               </div>
             </div>
             <div className="max-w-[900px] space-y-8">

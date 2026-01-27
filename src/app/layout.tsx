@@ -32,7 +32,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body >
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
