@@ -3,4 +3,54 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: "Plus Jakarta Sans", sans-serif;
+
+  --color-primary: #ee2b5b;
+  --color-background-light: #FFFDFB;
+  --color-background-dark: #1a0a0e;
+  --color-wine: #4a0e1c;
+  --color-rose-dust: #d68a97;
+}
+
+@utility heart-glow {
+  filter: drop-shadow(0 0 40px rgba(238, 43, 91, 0.25));
+}
+
+@utility soft-gradient-bg {
+  background: radial-gradient(circle at center, rgba(238, 43, 91, 0.03) 0%, transparent 70%);
+}
+
+@utility hero-title {
+  line-height: 1.1;
+}
+
+@utility glass-border {
+  border: 1px solid rgba(238, 43, 91, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+@utility premium-button-glow {
+  box-shadow: 0 0 20px rgba(238, 43, 91, 0.4);
+}
+
+@utility icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@utility heart-pulse {
+  animation: heart-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes heart-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
