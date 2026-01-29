@@ -3,22 +3,64 @@ import { api, HydrateClient } from "~/trpc/server";
 import HeartParticles from "./_components/heartParticles";
 import Welcome from "./_components/welcome";
 import Header from "./_components/header";
+import { ArrowRight } from "lucide-react";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
   const session = await auth();
-
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
 
   return (
     <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-rose-300 text-white">
-        <HeartParticles/>
-        <Welcome/>
-        <Header/>
-      </main>
+      <div className="bg-background-light font-display text-wine transition-colors duration-300 min-h-screen relative overflow-x-hidden">
+        {/* Heart Particles Animation Background */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <HeartParticles />
+        </div>
+
+        {/* Header/Navbar */}
+        <Header />
+
+        {/* Main Content */}
+        <main className="relative z-10">
+          <section className="relative flex min-h-[90vh] flex-col items-center justify-center px-4 text-center soft-gradient-bg pt-20">
+            <div className="mb-10 heart-glow relative z-0">
+              <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full scale-75 animate-pulse"></div>
+              <div className="relative flex h-24 w-24 md:h-32 md:w-32 items-center justify-center rounded-full bg-white shadow-lg shadow-primary/5 border border-primary/5 transition-transform duration-500 hover:scale-105">
+                <svg
+                  className="h-12 w-12 md:h-16 md:w-16 text-primary fill-current heart-pulse"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </div>
+            </div>
+            <div className="max-w-[900px] space-y-6 md:space-y-8">
+              <h1 className="hero-title text-5xl font-extrabold tracking-tight text-wine md:text-8xl">
+                RoboCupido
+              </h1>
+              <p className="mx-auto max-w-[580px] text-base font-medium text-rose-dust/80 md:text-lg">
+                By Roborregos
+              </p>
+              <div className="pt-6">
+                <button className="flex min-w-[220px] mx-auto items-center justify-center gap-2 rounded-full bg-primary h-14 px-8 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-all hover:translate-y-[-2px] hover:shadow-2xl active:translate-y-0">
+                  Encuentra tu match
+                  <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="px-4 py-8 text-center relative z-10">
+          <div className="mx-auto max-w-[960px] space-y-6">
+            <div className="pt-10 border-t border-primary/5">
+              <p className="text-xs font-medium text-rose-dust/80">
+                Made by  <span className="text-wine font-bold">Roborregos</span><span className="text-primary">❤️</span>
+              </p>
+            </div>
+          </div>
+        </footer>
+      </div>
     </HydrateClient>
   );
 }
