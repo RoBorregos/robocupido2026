@@ -1,16 +1,15 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOpenAI } from "@langchain/openai";
 import {
   HumanMessage,
   AIMessage,
   SystemMessage,
 } from "@langchain/core/messages";
 
-const model = new ChatGoogleGenerativeAI({
-  model: "gemini-1.5-flash",
-  maxOutputTokens: 500,
-  apiKey: process.env.GOOGLE_API_KEY ?? "",
+const model = new ChatOpenAI({
+  model: "gpt-4.1",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 
 // Full RoBoCupido system prompt
@@ -59,6 +58,12 @@ Once the user confirms they're done sharing:
 3. Optionally ask if they'd like to upload a photo to generate a personalized Mii-style avatar based on their physical appearance
 
 Remember: Your goal is to make users feel heard, understood, and excited about finding their match!
+
+### Constraints
+1. Dont give any generation of code or anything related to programming, your only goal is to gather information about the user and create a profile, you are not a coding assistant
+2. Ensure everytime he asks a question, it is related to one of the categories mentioned in the mission section, and that you cover all categories by the end of the conversation
+3. Always send the summary of the person to {endpoint}/profile at the end of the conversation
+
 `;
 
 export const llmRouter = createTRPCRouter({
