@@ -14,10 +14,26 @@ interface Message {
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [done, setDone] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chatMutation = api.llm.chat.useMutation();
+  const greetingQuery = api.llm.greeting.useQuery(undefined, {
+    enabled: messages.length === 0,
+  });
+
+  // Show bot greeting as first message
+  useEffect(() => {
+    if (greetingQuery.data && messages.length === 0) {
+      setMessages([
+        {
+          id: "greeting",
+          role: "assistant",
+          content: greetingQuery.data.content,
+        },
+      ]);
+    }
+  }, [greetingQuery.data, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,15 +43,9 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      setShowWelcome(false);
-    }
-  }, [messages]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || chatMutation.isPending) return;
+    if (!input.trim() || chatMutation.isPending || done) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -61,7 +71,11 @@ const Chat = () => {
         content: response.content,
       };
       setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
+
+      if (response.done) {
+        setDone(true);
+      }
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -118,47 +132,13 @@ const Chat = () => {
           </Link>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-            <span className="text-sm text-white/60">En línea</span>
+            <span className="text-sm text-white/60">En linea</span>
           </div>
         </div>
       </header>
 
       <div className="relative z-10 flex-1 overflow-y-auto px-4 py-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          {showWelcome && (
-            <div className="animate-in fade-in flex flex-col items-center justify-center py-20 text-center duration-1000">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 animate-ping rounded-full bg-pink-500/30" />
-                <div className="relative rounded-full bg-linear-to-br from-pink-500 to-purple-600 p-6">
-                  <Heart className="h-12 w-12 text-white" />
-                </div>
-              </div>
-              <h2 className="mb-4 bg-linear-to-r from-white via-pink-200 to-white bg-clip-text text-3xl font-bold text-transparent">
-                ¡Hola! Soy RoBoCupido
-              </h2>
-              <p className="mb-2 max-w-md text-lg text-white/70">
-                Estoy aquí para conocerte mejor y ayudarte a encontrar tu match
-                perfecto.
-              </p>
-              <p className="text-sm text-white/40">
-                Cuéntame sobre ti para comenzar...
-              </p>
-              <div className="mt-8 flex gap-2">
-                {["Hola!", "Busco amigos", "Quiero mi match"].map(
-                  (suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => setInput(suggestion)}
-                      className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/70 backdrop-blur-sm transition-all hover:border-pink-500/50 hover:bg-white/10 hover:text-white"
-                    >
-                      {suggestion}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-          )}
-
           {messages.map((message, index) => (
             <div
               key={message.id}
@@ -170,7 +150,6 @@ const Chat = () => {
                   message.role === "user" ? "order-2" : "order-1"
                 }`}
               >
-                {/* Avatar */}
                 {message.role === "assistant" && (
                   <div className="absolute top-0 -left-12 hidden md:block">
                     <div className="rounded-full bg-linear-to-br from-pink-500 to-purple-600 p-2">
@@ -179,7 +158,6 @@ const Chat = () => {
                   </div>
                 )}
 
-                {/* Message bubble */}
                 <div
                   className={`rounded-2xl px-5 py-3 ${
                     message.role === "user"
@@ -190,7 +168,6 @@ const Chat = () => {
                   <p className="leading-relaxed">{message.content}</p>
                 </div>
 
-                {/* Glow effect for user messages */}
                 {message.role === "user" && (
                   <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-r from-pink-600 to-purple-600 opacity-50 blur-xl" />
                 )}
@@ -198,7 +175,6 @@ const Chat = () => {
             </div>
           ))}
 
-          {/* Typing indicator */}
           {chatMutation.isPending && (
             <div className="animate-in fade-in flex justify-start duration-300">
               <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm">
@@ -212,7 +188,7 @@ const Chat = () => {
                   ))}
                 </div>
                 <span className="text-sm text-white/50">
-                  RoBoCupido está escribiendo...
+                  RoBoCupido esta escribiendo...
                 </span>
               </div>
             </div>
@@ -224,32 +200,38 @@ const Chat = () => {
 
       {/* Input area */}
       <div className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-xl">
-        <form onSubmit={handleSubmit} className="mx-auto max-w-3xl px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Escribe tu mensaje..."
-                className="w-full rounded-full border border-white/20 bg-white/5 px-6 py-4 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-pink-500/50 focus:bg-white/10 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-                disabled={chatMutation.isPending}
-              />
-              <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-r from-pink-500/10 to-purple-500/10 opacity-0 transition-opacity group-focus-within:opacity-100" />
-            </div>
-            <button
-              type="submit"
-              disabled={chatMutation.isPending || !input.trim()}
-              className="group relative rounded-full bg-linear-to-r from-pink-600 to-purple-600 p-4 text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-50 disabled:hover:scale-100"
-            >
-              <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
-              <div className="absolute inset-0 -z-10 rounded-full bg-linear-to-r from-pink-600 to-purple-600 opacity-0 blur-xl transition-opacity group-hover:opacity-50" />
-            </button>
+        {done ? (
+          <div className="mx-auto max-w-3xl px-4 py-4 text-center">
+            <p className="text-sm text-white/50">
+              Tu perfil ha sido guardado. ¡Nos vemos el 14 de febrero!
+            </p>
           </div>
-          <p className="mt-3 text-center text-xs text-white/30">
-            Tus respuestas nos ayudarán a encontrar tu match perfecto
-          </p>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="mx-auto max-w-3xl px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Escribe tu mensaje..."
+                  className="w-full rounded-full border border-white/20 bg-white/5 px-6 py-4 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-pink-500/50 focus:bg-white/10 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+                  disabled={chatMutation.isPending}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={chatMutation.isPending || !input.trim()}
+                className="group relative rounded-full bg-linear-to-r from-pink-600 to-purple-600 p-4 text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
+            <p className="mt-3 text-center text-xs text-white/30">
+              Tus respuestas nos ayudaran a encontrar tu match perfecto
+            </p>
+          </form>
+        )}
       </div>
     </div>
   );
