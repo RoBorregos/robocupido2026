@@ -97,7 +97,7 @@ const Chat = () => {
           className="absolute -bottom-1/4 left-1/3 h-96 w-96 animate-pulse rounded-full bg-rose-500/20 blur-3xl"
           style={{ animationDelay: "2s" }}
         />
-        {[...Array(20)].map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <div
             key={i}
             className="absolute h-1 w-1 animate-pulse rounded-full bg-white/20"

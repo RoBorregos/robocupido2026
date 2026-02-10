@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({
-      hasSubmitted: !!user?.fullName,
+      hasSubmitted: !!user?.aboutMe,
       profileId: user?.id ?? null,
     });
   } catch (error) {

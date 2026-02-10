@@ -1,13 +1,10 @@
-import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
+import { HydrateClient } from "~/trpc/server";
 import HeartParticles from "./_components/heartParticles";
-import Welcome from "./_components/welcome";
 import Header from "./_components/header";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default async function Home() {
-  const session = await auth();
 
   return (
     <HydrateClient>

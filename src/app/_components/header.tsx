@@ -1,9 +1,7 @@
-import { auth } from "~/server/auth";
 import Image from "next/image";
 import { Globe } from "lucide-react";
 
 const Header = async () => {
-    const session = await auth();
     return (
         <div className="fixed top-0 left-0 right-0 z-50 flex justify-center py-4 md:py-6 px-4">
             <header className="flex h-14 md:h-16 w-full max-w-240 items-center justify-between px-4 md:px-8 transition-all duration-300">

@@ -7,7 +7,7 @@ export const userRouter = createTRPCRouter({
       where: { id: ctx.session.user.id },
       select: {
         age: true,
-        genre: true,
+        gender: true,
         instagram: true,
         lookingFor: true,
         preferences: true,

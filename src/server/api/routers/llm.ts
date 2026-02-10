@@ -86,9 +86,10 @@ export const llmRouter = createTRPCRouter({
       const content = response.content as string;
 
       // Check if the LLM returned the summary
-      const summaryMatch = content.match(
-        /---RESUMEN---\s*\n\s*aboutMe:\s*"?([^"]*?)"?\s*\n\s*aboutThem:\s*"?([^"]*?)"?\s*\n\s*---FIN---/s,
-      );
+      const summaryMatch =
+        /---RESUMEN---\s*\n\s*aboutMe:\s*"?([^"]*?)"?\s*\n\s*aboutThem:\s*"?([^"]*?)"?\s*\n\s*---FIN---/s.exec(
+          content,
+        );
 
       if (summaryMatch) {
         const aboutMe = summaryMatch[1]!.trim();
