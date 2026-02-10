@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import {
   HumanMessage,
   AIMessage,
@@ -9,6 +9,11 @@ import {
 
 const model = new ChatOpenAI({
   model: "gpt-4.1",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+});
+
+const embeddings = new OpenAIEmbeddings({
+  model: "text-embedding-3-small",
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 
@@ -89,10 +94,22 @@ export const llmRouter = createTRPCRouter({
         const aboutMe = summaryMatch[1]!.trim();
         const aboutThem = summaryMatch[2]!.trim();
 
-        await ctx.db.user.update({
-          where: { id: ctx.session.user.id },
-          data: { aboutMe, aboutThem },
-        });
+        const [aboutMeEmbedding, aboutThemEmbedding] = await Promise.all([
+          embeddings.embedQuery(aboutMe),
+          embeddings.embedQuery(aboutThem),
+        ]);
+
+        const aboutMeVector = `[${aboutMeEmbedding.join(",")}]`;
+        const aboutThemVector = `[${aboutThemEmbedding.join(",")}]`;
+
+        await ctx.db.$executeRaw`
+          UPDATE "User"
+          SET "aboutMe" = ${aboutMe},
+              "aboutThem" = ${aboutThem},
+              "aboutMeEmbedding" = ${aboutMeVector}::vector,
+              "aboutThemEmbedding" = ${aboutThemVector}::vector
+          WHERE id = ${ctx.session.user.id}
+        `;
 
         return {
           content:

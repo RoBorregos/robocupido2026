@@ -17,22 +17,22 @@ export const db = globalForPrisma.prisma ?? createPrismaClient();
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
 /**
- * Find the top-N most similar users to a given embedding using cosine similarity.
- * Excludes the user themselves from results.
+ * Find the top-N matches for a user by comparing their aboutThemEmbedding
+ * (what they want) against other users' aboutMeEmbedding (who they are).
  */
 export async function findSimilarUsers(
   userId: string,
-  embedding: number[],
+  aboutThemEmbedding: number[],
   limit = 10,
 ) {
-  const vectorStr = `[${embedding.join(",")}]`;
+  const vectorStr = `[${aboutThemEmbedding.join(",")}]`;
   return db.$queryRawUnsafe<
     { id: string; name: string | null; email: string | null; similarity: number }[]
   >(
-    `SELECT id, name, email, 1 - (embedding <=> $1::vector) AS similarity
+    `SELECT id, name, email, 1 - ("aboutMeEmbedding" <=> $1::vector) AS similarity
      FROM "User"
-     WHERE id != $2 AND embedding IS NOT NULL
-     ORDER BY embedding <=> $1::vector
+     WHERE id != $2 AND "aboutMeEmbedding" IS NOT NULL
+     ORDER BY "aboutMeEmbedding" <=> $1::vector
      LIMIT $3`,
     vectorStr,
     userId,

@@ -56,11 +56,13 @@ model User {
 
     age         Int?
     instagram   String?
-    genre       String?
+    gender      String?
     preferences String?
     lookingFor  String?
+    loveLanguage String?
     aboutMe     String?
     aboutThem   String?
 
-    embedding Unsupported("vector(1536)")?
+    aboutMeEmbedding   Unsupported("vector(1536)")?
+    aboutThemEmbedding Unsupported("vector(1536)")?
 }
