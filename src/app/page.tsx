@@ -53,18 +53,6 @@ export default async function Home() {
             </div>
           </section>
         </main>
-
-        {/* Footer */}
-        <footer className="relative z-10 px-4 py-8 text-center">
-          <div className="mx-auto max-w-240 space-y-6">
-            <div className="border-primary/5 border-t pt-10">
-              <p className="text-rose-dust/80 text-xs font-medium">
-                Made by <span className="text-wine font-bold">Roborregos</span>
-                <span className="text-primary">❤️</span>
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
     </HydrateClient>
   );

@@ -79,7 +79,6 @@ export const llmRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      // Build messages with system prompt + conversation history
       const langchainMessages = [
         new SystemMessage(SYSTEM_PROMPT),
         ...input.messages.map((msg) =>
