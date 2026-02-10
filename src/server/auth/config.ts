@@ -1,42 +1,15 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import { type NextAuthConfig } from "next-auth";
 
 import { db } from "~/server/db";
+import { authConfigBase } from "./config.edge";
 
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-    } & DefaultSession["user"];
-  }
-}
+export { authConfigBase };
 
+/**
+ * Full config with Prisma adapter — used server-side only.
+ */
 export const authConfig = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID!,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-    }),
-  ],
+  ...authConfigBase,
   adapter: PrismaAdapter(db),
-  callbacks: {
-    signIn: ({ user, profile }) => {
-      const isAllowed =
-        user?.email?.endsWith("@tec.mx") &&
-        (profile as Record<string, unknown>)?.email_verified === true;
-      return !!isAllowed;
-    },
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
 } satisfies NextAuthConfig;

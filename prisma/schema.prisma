@@ -49,15 +49,17 @@ model User {
     name          String?
     email         String?   @unique
     emailVerified DateTime?
+    image         String?
     accounts      Account[]
     sessions      Session[]
 
     age         Int?
+    instagram   String?
     genre       String?
-    phone       String?
     preferences String?
-    aboutThem   String?
     lookingFor  String?
+    aboutMe     String?
+    aboutThem   String?
 
     embedding Unsupported("vector(1536)")?
 }

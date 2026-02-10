@@ -43,7 +43,7 @@ export default async function Home() {
               </p>
               <div className="pt-6">
                 <Link
-                  href="/chat"
+                  href="/questionnaire"
                   className="bg-primary shadow-primary/30 mx-auto flex h-14 min-w-55 items-center justify-center gap-2 rounded-full px-8 text-sm font-bold text-white shadow-xl transition-all hover:translate-y-0.5 hover:shadow-2xl active:translate-y-0"
                 >
                   Encuentra tu match
