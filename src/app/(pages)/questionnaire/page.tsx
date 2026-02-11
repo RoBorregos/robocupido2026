@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
-import { Heart, Sparkles, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import Header from "../../_components/header";
 
 export default function QuestionnairePage() {
   const router = useRouter();
@@ -45,197 +45,161 @@ export default function QuestionnairePage() {
     (!needsPreferences || form.preferences);
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/4 -left-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
-        <div
-          className="absolute top-1/4 -right-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/20 blur-3xl"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute -bottom-1/4 left-1/3 h-96 w-96 animate-pulse rounded-full bg-rose-500/20 blur-3xl"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
+    <div className="bg-background-light font-display text-wine relative min-h-screen transition-colors duration-300 overflow-x-hidden">
+      {/* Top Navigation */}
+      <Header />
 
-      {/* Header */}
-      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-80"
-          >
-            <div className="relative">
-              <Heart className="h-8 w-8 fill-pink-500 text-pink-500" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400" />
+      {/* Main Content */}
+      <main className="gradient-bg flex flex-col items-center justify-center px-6 py-10 min-h-[calc(100vh-80px)]">
+        <div className="max-w-[600px] w-full space-y-12">
+          {/* Progress Section */}
+          <div className="w-full flex flex-col gap-4 mb-2">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-primary font-bold text-sm uppercase tracking-widest mb-1">Tu Perfil</p>
+                <h3 className="text-wine text-2xl font-bold">Paso 1 de 1</h3>
+              </div>
+              <p className="text-wine text-lg font-medium opacity-60">100%</p>
             </div>
-            <div>
-              <h1 className="bg-linear-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-xl font-bold text-transparent">
-                RoBoCupido
+            <div className="h-3 w-full bg-pink-100/50 rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: "100%" }}></div>
+            </div>
+            <p className="text-rose-brown text-sm font-medium">Casi listo para encontrar tu match ideal...</p>
+          </div>
+
+          {/* Form Container */}
+          <form
+            onSubmit={handleSubmit}
+            className="group relative bg-white border border-pink-100 p-8 md:p-10 rounded-2xl shadow-xl transition-all duration-300"
+          >
+            <div className="text-center mb-10">
+              <h1 className="font-serif text-4xl md:text-5xl text-wine leading-tight mb-4">
+                Cuéntanos sobre ti
               </h1>
-              <p className="text-xs text-white/50">Cuentanos de ti</p>
+              <p className="text-rose-brown font-medium">
+                Esta información nos ayudará a encontrar personas compatibles contigo.
+              </p>
             </div>
-          </Link>
-        </div>
-      </header>
 
-      {/* Form */}
-      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-lg space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl"
-        >
-          <div className="text-center">
-            <h2 className="mb-2 text-2xl font-bold text-white">
-              Sobre ti
-            </h2>
-            <p className="text-sm text-white/60">
-              Responde estas preguntas para encontrar tu match ideal
-            </p>
-          </div>
+            <div className="grid grid-cols-1 gap-6">
+              {/* Age */}
+              <div className="space-y-2">
+                <label className="text-primary text-sm font-bold uppercase tracking-wider">Edad</label>
+                <input
+                  type="number"
+                  value={form.age}
+                  onChange={(e) => update("age", e.target.value)}
+                  placeholder="Ej: 20"
+                  min={16}
+                  max={100}
+                  required
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm"
+                />
+              </div>
 
-          {/* Age */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Edad
-            </label>
-            <input
-              type="number"
-              value={form.age}
-              onChange={(e) => update("age", e.target.value)}
-              placeholder="Ej: 20"
-              min={16}
-              max={100}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            />
-          </div>
+              {/* Genre */}
+              <div className="space-y-2">
+                <label className="text-primary text-sm font-bold uppercase tracking-wider">Género</label>
+                <select
+                  value={form.genre}
+                  onChange={(e) => update("genre", e.target.value)}
+                  required
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  <option value="Hombre" className="bg-white">Hombre</option>
+                  <option value="Mujer" className="bg-white">Mujer</option>
+                  <option value="No binario" className="bg-white">No binario</option>
+                  <option value="Otro" className="bg-white">Otro</option>
+                </select>
+              </div>
 
-          {/* Genre */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Genero
-            </label>
-            <select
-              value={form.genre}
-              onChange={(e) => update("genre", e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            >
-              <option value="" disabled className="bg-slate-900">
-                Selecciona
-              </option>
-              <option value="Hombre" className="bg-slate-900">
-                Hombre
-              </option>
-              <option value="Mujer" className="bg-slate-900">
-                Mujer
-              </option>
-              <option value="No binario" className="bg-slate-900">
-                No binario
-              </option>
-              <option value="Otro" className="bg-slate-900">
-                Otro
-              </option>
-            </select>
-          </div>
+              {/* Instagram */}
+              <div className="space-y-2">
+                <label className="text-primary text-sm font-bold uppercase tracking-wider">Instagram</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-brown font-bold">@</span>
+                  <input
+                    type="text"
+                    value={form.instagram.startsWith("@") ? form.instagram.slice(1) : form.instagram}
+                    onChange={(e) => update("instagram", "@" + e.target.value)}
+                    placeholder="tuusuario"
+                    required
+                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 pl-10 pr-4 py-4 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm"
+                  />
+                </div>
+              </div>
 
-          {/* Instagram */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Instagram
-            </label>
-            <input
-              type="text"
-              value={form.instagram}
-              onChange={(e) => update("instagram", e.target.value)}
-              placeholder="Ej: @tuusuario"
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            />
-          </div>
+              {/* Looking For */}
+              <div className="space-y-2">
+                <label className="text-primary text-sm font-bold uppercase tracking-wider">Busco</label>
+                <select
+                  value={form.lookingFor}
+                  onChange={(e) => update("lookingFor", e.target.value)}
+                  required
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  <option value="Pareja" className="bg-white">Pareja</option>
+                  <option value="Amigos" className="bg-white">Amigos</option>
+                  <option value="Algo casual" className="bg-white">Algo casual</option>
+                </select>
+              </div>
 
-          {/* Looking For */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Busco
-            </label>
-            <select
-              value={form.lookingFor}
-              onChange={(e) => update("lookingFor", e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            >
-              <option value="" disabled className="bg-slate-900">
-                Selecciona
-              </option>
-              <option value="Pareja" className="bg-slate-900">
-                Pareja
-              </option>
-              <option value="Amigos" className="bg-slate-900">
-                Amigos
-              </option>
-              <option value="Algo casual" className="bg-slate-900">
-                Algo casual
-              </option>
-            </select>
-          </div>
+              {/* Preferences */}
+              {needsPreferences && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <label className="text-primary text-sm font-bold uppercase tracking-wider">Me interesan</label>
+                  <select
+                    value={form.preferences}
+                    onChange={(e) => update("preferences", e.target.value)}
+                    required
+                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-white">Selecciona</option>
+                    <option value="Hombres" className="bg-white">Hombres</option>
+                    <option value="Mujeres" className="bg-white">Mujeres</option>
+                    <option value="Indiferente" className="bg-white">Indiferente</option>
+                  </select>
+                </div>
+              )}
+            </div>
 
-          {/* Preferences - only for Pareja / Algo casual */}
-          {needsPreferences && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-white/80">
-                Me interesan
-              </label>
-              <select
-                value={form.preferences}
-                onChange={(e) => update("preferences", e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+            {/* Submit Button */}
+            <div className="pt-10 mt-10 border-t border-pink-100">
+              <button
+                type="submit"
+                disabled={!isValid || submitProfile.isPending}
+                className="bg-primary shadow-primary/20 flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               >
-                <option value="" disabled className="bg-slate-900">
-                  Selecciona
-                </option>
-                <option value="Hombres" className="bg-slate-900">
-                  Hombres
-                </option>
-                <option value="Mujeres" className="bg-slate-900">
-                  Mujeres
-                </option>
-                <option value="Indiferente" className="bg-slate-900">
-                  Indiferente
-                </option>
-              </select>
+                {submitProfile.isPending ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    Continuar al chat
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+              {submitProfile.isError && (
+                <p className="mt-4 text-center text-sm font-bold text-primary animate-pulse">
+                  Hubo un error, intenta de nuevo.
+                </p>
+              )}
             </div>
-          )}
+          </form>
+        </div>
+      </main>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!isValid || submitProfile.isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-pink-600 to-purple-600 px-6 py-4 text-sm font-bold text-white transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-50 disabled:hover:scale-100"
-          >
-            {submitProfile.isPending ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                Continuar al chat
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
-
-          {submitProfile.isError && (
-            <p className="text-center text-sm text-red-400">
-              Hubo un error, intenta de nuevo.
-            </p>
-          )}
-        </form>
-      </div>
+      {/* Footer */}
+      <footer className="w-full py-8 text-center opacity-40">
+        <p className="text-rose-brown text-xs uppercase tracking-widest font-bold">
+          Hecho con amor por Roborregos • 2024
+        </p>
+      </footer>
     </div>
   );
 }

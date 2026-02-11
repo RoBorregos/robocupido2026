@@ -3,13 +3,23 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-display: var(--font-plus-jakarta-sans), "Plus Jakarta Sans", sans-serif;
+  --font-serif: var(--font-playfair-display), "Playfair Display", serif;
 
   --color-primary: #ee2b5b;
-  --color-background-light: #FFFDFB;
-  --color-background-dark: #1a0a0e;
-  --color-wine: #4a0e1c;
+  --color-background-light: #fdf8f9;
+  --color-background-dark: #221015;
+  --color-wine: #181113;
   --color-rose-dust: #d68a97;
+  --color-rose-brown: #89616b;
+}
+
+@utility gradient-bg {
+  background: radial-gradient(circle at top right, #fff5f7 0%, #fdf8f9 100%);
+}
+
+@utility dark-gradient-bg {
+  background: radial-gradient(circle at top right, #2d161c 0%, #221015 100%);
 }
 
 @utility heart-glow {
