@@ -11,5 +11,5 @@ export { authConfigBase };
  */
 export const authConfig = {
   ...authConfigBase,
-  adapter: PrismaAdapter(db),
+  adapter: PrismaAdapter(db as any),
 } satisfies NextAuthConfig;
