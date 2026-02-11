@@ -18,14 +18,19 @@ export const userRouter = createTRPCRouter({
   }),
 
   getProfileDescription: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.user.findUnique({
+    const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
       select: {
-        profileDescription: true,
         aboutMe: true,
         aboutThem: true,
       },
     });
+
+    return {
+      profileDescription: user?.aboutMe ?? null,
+      aboutMe: user?.aboutMe ?? null,
+      aboutThem: user?.aboutThem ?? null,
+    };
   }),
 
   hasCompletedProfile: protectedProcedure.query(async ({ ctx }) => {
