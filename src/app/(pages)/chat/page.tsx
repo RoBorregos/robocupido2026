@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Send, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -12,15 +13,24 @@ interface Message {
 }
 
 const Chat = () => {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [done, setDone] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chatMutation = api.llm.chat.useMutation();
+  const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
   const greetingQuery = api.llm.greeting.useQuery(undefined, {
-    enabled: messages.length === 0,
+    enabled: messages.length === 0 && !hasCompletedQuery.data?.completed,
   });
+
+  // Redirect if user already completed their profile
+  useEffect(() => {
+    if (hasCompletedQuery.data?.completed) {
+      router.push("/waiting");
+    }
+  }, [hasCompletedQuery.data, router]);
 
   // Show bot greeting as first message
   useEffect(() => {
@@ -74,6 +84,10 @@ const Chat = () => {
 
       if (response.done) {
         setDone(true);
+        // Redirect to waiting page after a short delay
+        setTimeout(() => {
+          router.push("/waiting");
+        }, 2000);
       }
     } catch {
       const errorMessage: Message = {
@@ -201,10 +215,21 @@ const Chat = () => {
       {/* Input area */}
       <div className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-xl">
         {done ? (
-          <div className="mx-auto max-w-3xl px-4 py-4 text-center">
-            <p className="text-sm text-white/50">
-              Tu perfil ha sido guardado. ¡Nos vemos el 14 de febrero!
-            </p>
+          <div className="mx-auto max-w-3xl px-4 py-6 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="h-2 w-2 animate-bounce rounded-full bg-pink-400"
+                    style={{ animationDelay: `${i * 150}ms` }}
+                  />
+                ))}
+              </div>
+              <p className="text-white/60">
+                Preparando tu perfil... Redirigiendo...
+              </p>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mx-auto max-w-3xl px-4 py-4">

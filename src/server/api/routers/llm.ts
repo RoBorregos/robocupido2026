@@ -103,12 +103,27 @@ export const llmRouter = createTRPCRouter({
         const aboutMeVector = `[${aboutMeEmbedding.join(",")}]`;
         const aboutThemVector = `[${aboutThemEmbedding.join(",")}]`;
 
+        // Generate a personalized profile description using the LLM
+        const profileDescriptionPrompt = `Basándote en la siguiente información sobre una persona, genera una descripción atractiva y amigable de su perfil en 2-3 oraciones. Hazlo en segunda persona ("Eres...") para que se sienta personal. Mantén un tono positivo y resalta sus mejores cualidades.
+
+Información de la persona:
+${aboutMe}
+
+Genera solo la descripción, sin explicaciones adicionales.`;
+
+        const profileResponse = await model.invoke([
+          new SystemMessage("Eres un asistente que crea descripciones de perfil atractivas y positivas en español."),
+          new HumanMessage(profileDescriptionPrompt),
+        ]);
+        const profileDescription = (profileResponse.content as string).trim();
+
         await ctx.db.$executeRaw`
           UPDATE "User"
           SET "aboutMe" = ${aboutMe},
               "aboutThem" = ${aboutThem},
               "aboutMeEmbedding" = ${aboutMeVector}::vector,
-              "aboutThemEmbedding" = ${aboutThemVector}::vector
+              "aboutThemEmbedding" = ${aboutThemVector}::vector,
+              "profileDescription" = ${profileDescription}
           WHERE id = ${ctx.session.user.id}
         `;
 
@@ -116,6 +131,7 @@ export const llmRouter = createTRPCRouter({
           content:
             "¡Gracias por compartir todo esto conmigo! Ya tengo tu perfil listo. Ahora solo queda esperar al 14 de febrero para ver tus matches. ¡Mucha suerte! 💘",
           done: true,
+          profileDescription,
         };
       }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Heart, Sparkles, ArrowRight } from "lucide-react";
@@ -10,11 +10,22 @@ export default function QuestionnairePage() {
   const router = useRouter();
   const [form, setForm] = useState({
     age: "",
-    genre: "",
+    gender: "",
     instagram: "",
     lookingFor: "",
     preferences: "",
+    carrera: "",
+    semestre: "",
   });
+
+  const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
+
+  // Redirect if user already completed their profile
+  useEffect(() => {
+    if (hasCompletedQuery.data?.completed) {
+      router.push("/waiting");
+    }
+  }, [hasCompletedQuery.data, router]);
 
   const submitProfile = api.user.submitProfile.useMutation({
     onSuccess: () => router.push("/chat"),
@@ -27,10 +38,12 @@ export default function QuestionnairePage() {
     e.preventDefault();
     submitProfile.mutate({
       age: parseInt(form.age),
-      genre: form.genre,
+      gender: form.gender,
       instagram: form.instagram,
       lookingFor: form.lookingFor,
       preferences: needsPreferences ? form.preferences : null,
+      carrera: form.carrera,
+      semestre: parseInt(form.semestre),
     });
   };
 
@@ -39,10 +52,32 @@ export default function QuestionnairePage() {
 
   const isValid =
     form.age &&
-    form.genre &&
+    form.gender &&
     form.instagram &&
     form.lookingFor &&
+    form.carrera &&
+    form.semestre &&
     (!needsPreferences || form.preferences);
+
+  // Show loading while checking profile status
+  if (hasCompletedQuery.isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="h-3 w-3 animate-bounce rounded-full bg-pink-400"
+                style={{ animationDelay: `${i * 150}ms` }}
+              />
+            ))}
+          </div>
+          <span className="text-white/60">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
@@ -112,14 +147,14 @@ export default function QuestionnairePage() {
             />
           </div>
 
-          {/* Genre */}
+          {/* Gender */}
           <div>
             <label className="mb-2 block text-sm font-medium text-white/80">
               Genero
             </label>
             <select
-              value={form.genre}
-              onChange={(e) => update("genre", e.target.value)}
+              value={form.gender}
+              onChange={(e) => update("gender", e.target.value)}
               required
               className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
             >
@@ -154,6 +189,43 @@ export default function QuestionnairePage() {
               required
               className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
             />
+          </div>
+
+          {/* Carrera */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-white/80">
+              Carrera
+            </label>
+            <input
+              type="text"
+              value={form.carrera}
+              onChange={(e) => update("carrera", e.target.value)}
+              placeholder="Ej: Ingeniería en Sistemas"
+              required
+              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+            />
+          </div>
+
+          {/* Semestre */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-white/80">
+              Semestre
+            </label>
+            <select
+              value={form.semestre}
+              onChange={(e) => update("semestre", e.target.value)}
+              required
+              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+            >
+              <option value="" disabled className="bg-slate-900">
+                Selecciona
+              </option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((sem) => (
+                <option key={sem} value={sem} className="bg-slate-900">
+                  {sem}° Semestre
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Looking For */}
