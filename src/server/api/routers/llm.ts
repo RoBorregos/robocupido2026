@@ -38,12 +38,14 @@ A traves de una conversacion natural en español, conocer al usuario para crear 
    - Intereses que les gustaria compartir
    - Que es un dealbreaker para ellos
 4. Cuando sientas que tienes suficiente info, pregunta si quieren agregar algo mas
-5. Cuando confirmen que terminaron, responde EXACTAMENTE con el formato:
+5. Cuando confirmen que terminaron, responde EXACTAMENTE con este formato (IMPORTANTE: usa exactamente estos delimitadores, no uses otros como ======= o *******):
 
 ---RESUMEN---
 aboutMe: [resumen conciso de la persona en tercera persona]
 aboutThem: [resumen conciso de lo que buscan en tercera persona]
 ---FIN---
+
+IMPORTANTE: Cuando generes el resumen, usa EXACTAMENTE "---RESUMEN---" al inicio y "---FIN---" al final. No uses otros formatos como "========" o "********".
 
 ## Reglas
 - Siempre en español
@@ -85,15 +87,23 @@ export const llmRouter = createTRPCRouter({
       const response = await model.invoke(langchainMessages);
       const content = response.content as string;
 
-      // Check if the LLM returned the summary
+      // Check if the LLM returned the summary - handle various formats the LLM might use
+      // Primary format: ---RESUMEN--- ... ---FIN---
+      // Also handles: ======= or ******* or similar delimiters
       const summaryMatch =
-        /---RESUMEN---\s*\n\s*aboutMe:\s*"?([^"]*?)"?\s*\n\s*aboutThem:\s*"?([^"]*?)"?\s*\n\s*---FIN---/s.exec(
+        /(?:---RESUMEN---|={3,}|[*]{3,}|\[RESUMEN\]|RESUMEN:?)\s*\n?\s*aboutMe:\s*"?([^"]*?)"?\s*\n\s*aboutThem:\s*"?([^"]*?)"?\s*\n?\s*(?:---FIN---|={3,}|[*]{3,}|\[FIN\]|FIN)?/si.exec(
           content,
         );
+      
+      // Fallback: try to extract if we see aboutMe and aboutThem patterns without delimiters
+      const fallbackMatch = !summaryMatch ? 
+        /aboutMe:\s*"?(.+?)"?\s*\n\s*aboutThem:\s*"?(.+?)"?\s*(?:\n|$)/si.exec(content) : null;
 
-      if (summaryMatch) {
-        const aboutMe = summaryMatch[1]!.trim();
-        const aboutThem = summaryMatch[2]!.trim();
+      const finalMatch = summaryMatch ?? fallbackMatch;
+
+      if (finalMatch) {
+        const aboutMe = finalMatch[1]!.trim();
+        const aboutThem = finalMatch[2]!.trim();
 
         const [aboutMeEmbedding, aboutThemEmbedding] = await Promise.all([
           embeddings.embedQuery(aboutMe),
