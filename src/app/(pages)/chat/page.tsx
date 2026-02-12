@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
-import { Send, Heart, Sparkles } from "lucide-react";
-import Link from "next/link";
+import { Send, Heart } from "lucide-react";
+import Header from "../../_components/header";
+import HeartParticles from "../../_components/heartParticles";
 
 interface Message {
   id: string;
@@ -100,58 +101,23 @@ const Chat = () => {
   };
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/4 -left-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
-        <div
-          className="absolute top-1/4 -right-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/20 blur-3xl"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute -bottom-1/4 left-1/3 h-96 w-96 animate-pulse rounded-full bg-rose-500/20 blur-3xl"
-          style={{ animationDelay: "2s" }}
-        />
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute h-1 w-1 animate-pulse rounded-full bg-white/20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-            }}
-          />
-        ))}
+    <div className="bg-background-light font-display text-wine relative flex h-screen w-full flex-col overflow-hidden transition-colors duration-300">
+      {/* Heart Particles Animation Background */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <HeartParticles />
       </div>
 
-      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-80"
-          >
-            <div className="relative">
-              <Heart className="h-8 w-8 fill-pink-500 text-pink-500" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400" />
-            </div>
-            <div>
-              <h1 className="bg-linear-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-xl font-bold text-transparent">
-                RoBoCupido
-              </h1>
-              <p className="text-xs text-white/50">
-                Tu match perfecto te espera
-              </p>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
-            <span className="text-sm text-white/60">En linea</span>
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <Header />
 
-      <div className="relative z-10 flex-1 overflow-y-auto px-4 py-6">
+      {/* Online status indicator */}
+      <div className="fixed top-20 right-4 z-20 flex items-center gap-2 rounded-full border border-pink-100 bg-white/80 px-3 py-1.5 shadow-md backdrop-blur-sm">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+        <span className="text-rose-brown text-sm">En línea</span>
+      </div>
+
+      {/* Messages Area */}
+      <div className="gradient-bg relative z-10 flex-1 overflow-y-auto px-4 py-6 pt-20">
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.map((message, index) => (
             <div
@@ -166,7 +132,7 @@ const Chat = () => {
               >
                 {message.role === "assistant" && (
                   <div className="absolute top-0 -left-12 hidden md:block">
-                    <div className="rounded-full bg-linear-to-br from-pink-500 to-purple-600 p-2">
+                    <div className="bg-primary rounded-full p-2">
                       <Heart className="h-4 w-4 text-white" />
                     </div>
                   </div>
@@ -175,15 +141,15 @@ const Chat = () => {
                 <div
                   className={`rounded-2xl px-5 py-3 ${
                     message.role === "user"
-                      ? "bg-linear-to-r from-pink-600 to-purple-600 text-white"
-                      : "border border-white/10 bg-white/5 text-white/90 backdrop-blur-sm"
+                      ? "bg-primary text-white shadow-lg"
+                      : "border border-pink-100 bg-white text-wine shadow-md"
                   }`}
                 >
                   <p className="leading-relaxed">{message.content}</p>
                 </div>
 
                 {message.role === "user" && (
-                  <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-r from-pink-600 to-purple-600 opacity-50 blur-xl" />
+                  <div className="bg-primary/30 absolute inset-0 -z-10 rounded-2xl blur-xl" />
                 )}
               </div>
             </div>
@@ -191,18 +157,18 @@ const Chat = () => {
 
           {chatMutation.isPending && (
             <div className="animate-in fade-in flex justify-start duration-300">
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-sm">
+              <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-5 py-4 shadow-md">
                 <div className="flex gap-1">
                   {[0, 1, 2].map((i) => (
                     <span
                       key={i}
-                      className="h-2 w-2 animate-bounce rounded-full bg-pink-400"
+                      className="bg-primary h-2 w-2 animate-bounce rounded-full"
                       style={{ animationDelay: `${i * 150}ms` }}
                     />
                   ))}
                 </div>
-                <span className="text-sm text-white/50">
-                  RoBoCupido esta escribiendo...
+                <span className="text-rose-brown text-sm">
+                  RoBoCupido está escribiendo...
                 </span>
               </div>
             </div>
@@ -213,7 +179,7 @@ const Chat = () => {
       </div>
 
       {/* Input area */}
-      <div className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-xl">
+      <div className="relative z-10 border-t border-pink-100 bg-white/80 backdrop-blur-xl">
         {done ? (
           <div className="mx-auto max-w-3xl px-4 py-6 text-center">
             <div className="flex items-center justify-center gap-3">
@@ -221,12 +187,12 @@ const Chat = () => {
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="h-2 w-2 animate-bounce rounded-full bg-pink-400"
+                    className="bg-primary h-2 w-2 animate-bounce rounded-full"
                     style={{ animationDelay: `${i * 150}ms` }}
                   />
                 ))}
               </div>
-              <p className="text-white/60">
+              <p className="text-rose-brown">
                 Preparando tu perfil... Redirigiendo...
               </p>
             </div>
@@ -240,20 +206,20 @@ const Chat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Escribe tu mensaje..."
-                  className="w-full rounded-full border border-white/20 bg-white/5 px-6 py-4 text-white placeholder-white/40 backdrop-blur-sm transition-all focus:border-pink-500/50 focus:bg-white/10 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+                  className="text-wine placeholder-rose-brown/50 w-full rounded-full border border-pink-200 bg-white px-6 py-4 transition-all focus:border-pink-400 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                   disabled={chatMutation.isPending}
                 />
               </div>
               <button
                 type="submit"
                 disabled={chatMutation.isPending || !input.trim()}
-                className="group relative rounded-full bg-linear-to-r from-pink-600 to-purple-600 p-4 text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-50 disabled:hover:scale-100"
+                className="bg-primary shadow-primary/30 group relative rounded-full p-4 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
               >
                 <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
-            <p className="mt-3 text-center text-xs text-white/30">
-              Tus respuestas nos ayudaran a encontrar tu match perfecto
+            <p className="text-rose-brown/60 mt-3 text-center text-xs">
+              Tus respuestas nos ayudarán a encontrar tu match perfecto
             </p>
           </form>
         )}

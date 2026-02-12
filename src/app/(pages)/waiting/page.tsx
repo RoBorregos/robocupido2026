@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Heart, Sparkles, Calendar, Clock, LogOut } from "lucide-react";
 import Link from "next/link";
+import Header from "../../_components/header";
+import HeartParticles from "../../_components/heartParticles";
 
 const WaitingPage = () => {
   const router = useRouter();
@@ -19,90 +21,41 @@ const WaitingPage = () => {
 
   if (profileQuery.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
+      <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="h-3 w-3 animate-bounce rounded-full bg-pink-400"
+                className="bg-primary h-3 w-3 animate-bounce rounded-full"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}
           </div>
-          <span className="text-white/60">Cargando tu perfil...</span>
+          <span className="text-rose-brown">Cargando tu perfil...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
-      {/* Animated background */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/4 -left-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
-        <div
-          className="absolute top-1/4 -right-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/20 blur-3xl"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute -bottom-1/4 left-1/3 h-96 w-96 animate-pulse rounded-full bg-rose-500/20 blur-3xl"
-          style={{ animationDelay: "2s" }}
-        />
-        {Array.from({ length: 30 }).map((_, i) => (
-          <Heart
-            key={i}
-            className="absolute animate-pulse text-pink-500/10"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              width: `${20 + Math.random() * 30}px`,
-              height: `${20 + Math.random() * 30}px`,
-            }}
-          />
-        ))}
+    <div className="bg-background-light font-display text-wine relative min-h-screen w-full overflow-hidden transition-colors duration-300">
+      {/* Heart Particles Animation Background */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <HeartParticles />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-80"
-          >
-            <div className="relative">
-              <Heart className="h-8 w-8 fill-pink-500 text-pink-500" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400" />
-            </div>
-            <div>
-              <h1 className="bg-linear-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-xl font-bold text-transparent">
-                RoBoCupido
-              </h1>
-              <p className="text-xs text-white/50">
-                Tu match perfecto te espera
-              </p>
-            </div>
-          </Link>
-          <Link
-            href="/logout"
-            className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm text-white/70 transition-all hover:bg-white/10 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Cerrar sesión</span>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       {/* Main content */}
-      <main className="relative z-10 flex flex-col items-center px-4 py-12">
+      <main className="gradient-bg relative z-10 flex flex-col items-center px-4 py-12 pt-24">
         <div className="w-full max-w-2xl space-y-8">
           {/* Success animation */}
           <div className="flex justify-center">
             <div className="relative">
-              <div className="absolute inset-0 animate-ping rounded-full bg-pink-500/30" />
-              <div className="relative rounded-full bg-linear-to-br from-pink-500 to-purple-600 p-6">
+              <div className="bg-primary/30 absolute inset-0 animate-ping rounded-full" />
+              <div className="bg-primary relative rounded-full p-6">
                 <Heart className="h-12 w-12 fill-white text-white" />
               </div>
             </div>
@@ -110,57 +63,57 @@ const WaitingPage = () => {
 
           {/* Title */}
           <div className="text-center">
-            <h2 className="bg-linear-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
+            <h2 className="text-wine text-3xl font-bold md:text-4xl">
               ¡Perfil Completado!
             </h2>
-            <p className="mt-2 text-white/60">
+            <p className="text-rose-brown mt-2">
               Hemos analizado tus respuestas y creado tu perfil de amor
             </p>
           </div>
 
           {/* Profile description card */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+          <div className="rounded-2xl border border-pink-100 bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-              <h3 className="text-lg font-semibold text-white">Tu Perfil</h3>
+              <Sparkles className="text-primary h-5 w-5" />
+              <h3 className="text-wine text-lg font-semibold">Tu Perfil</h3>
             </div>
-            <p className="leading-relaxed text-white/80">
+            <p className="text-rose-brown leading-relaxed">
               {profileQuery.data?.profileDescription ?? "Cargando descripción..."}
             </p>
           </div>
 
           {/* What you're looking for card */}
           {profileQuery.data?.aboutThem && (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+            <div className="rounded-2xl border border-pink-100 bg-white p-6 shadow-xl">
               <div className="mb-4 flex items-center gap-2">
-                <Heart className="h-5 w-5 text-pink-400" />
-                <h3 className="text-lg font-semibold text-white">Lo que buscas</h3>
+                <Heart className="text-primary h-5 w-5" />
+                <h3 className="text-wine text-lg font-semibold">Lo que buscas</h3>
               </div>
-              <p className="leading-relaxed text-white/80">
+              <p className="text-rose-brown leading-relaxed">
                 {profileQuery.data.aboutThem}
               </p>
             </div>
           )}
 
           {/* Waiting card */}
-          <div className="rounded-2xl border border-pink-500/20 bg-linear-to-r from-pink-500/10 to-purple-500/10 p-6 backdrop-blur-sm">
+          <div className="bg-primary/10 rounded-2xl border border-pink-200 p-6">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-pink-500/20 p-3">
-                <Calendar className="h-8 w-8 text-pink-400" />
+              <div className="bg-primary/20 rounded-full p-3">
+                <Calendar className="text-primary h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-wine text-lg font-semibold">
                   ¡Espera tus matches!
                 </h3>
-                <p className="text-white/60">
+                <p className="text-rose-brown">
                   Los resultados se revelarán el{" "}
-                  <span className="font-bold text-pink-400">14 de Febrero</span>
+                  <span className="text-primary font-bold">14 de Febrero</span>
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-black/20 py-3">
-              <Clock className="h-5 w-5 text-purple-400" />
-              <span className="text-white/80">
+            <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-white/50 py-3">
+              <Clock className="text-primary h-5 w-5" />
+              <span className="text-wine">
                 San Valentín está a la vuelta de la esquina 💘
               </span>
             </div>
@@ -168,18 +121,25 @@ const WaitingPage = () => {
 
           {/* Fun message */}
           <div className="text-center">
-            <p className="text-sm text-white/40">
+            <p className="text-rose-brown/60 text-sm">
               Mientras tanto, cruza los dedos y piensa en el amor... 🤞✨
             </p>
           </div>
 
-          {/* Back to home button */}
-          <div className="flex justify-center">
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
               href="/"
-              className="rounded-full border border-white/20 bg-white/5 px-6 py-3 text-white/80 transition-all hover:bg-white/10 hover:text-white"
+              className="text-wine hover:border-primary rounded-full border border-pink-200 bg-white px-6 py-3 text-center transition-all hover:bg-pink-50"
             >
               Volver al inicio
+            </Link>
+            <Link
+              href="/logout"
+              className="text-rose-brown hover:text-wine flex items-center justify-center gap-2 rounded-full border border-pink-100 px-6 py-3 transition-all hover:bg-pink-50"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar sesión
             </Link>
           </div>
         </div>
