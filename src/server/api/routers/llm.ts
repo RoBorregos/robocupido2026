@@ -119,19 +119,31 @@ export const llmRouter = createTRPCRouter({
       const response = await model.invoke(langchainMessages);
       const content = response.content as string;
 
+      // Debug: log the LLM response to see what format it's using
+      console.log("LLM Response:", content);
+
       // Check if the LLM returned the summary - handle various formats the LLM might use
       // Primary format: ---RESUMEN--- ... ---FIN---
-      // Also handles: ======= or ******* or similar delimiters
+      // Improved regex to capture multi-line content
       const summaryMatch =
-        /(?:---RESUMEN---|={3,}|[*]{3,}|\[RESUMEN\]|RESUMEN:?)\s*\n?\s*aboutMe:\s*"?([^"]*?)"?\s*\n\s*aboutThem:\s*"?([^"]*?)"?\s*\n?\s*(?:---FIN---|={3,}|[*]{3,}|\[FIN\]|FIN)?/si.exec(
+        /(?:---RESUMEN---|={3,}|[*]{3,}|\[RESUMEN\]|RESUMEN:?)\s*\n?\s*aboutMe:\s*"?(.+?)(?:"|(?=\s*\n\s*aboutThem:))\s*\n\s*aboutThem:\s*"?(.+?)(?:"|(?=\s*\n?\s*(?:---FIN---|={3,}|[*]{3,}|\[FIN\]|$)))/si.exec(
           content,
         );
       
       // Fallback: try to extract if we see aboutMe and aboutThem patterns without delimiters
       const fallbackMatch = !summaryMatch ? 
-        /aboutMe:\s*"?(.+?)"?\s*\n\s*aboutThem:\s*"?(.+?)"?\s*(?:\n|$)/si.exec(content) : null;
+        /aboutMe:\s*"?(.+?)(?:"|(?=\s*\n\s*aboutThem:))\s*\n\s*aboutThem:\s*"?(.+?)(?:"|(?=\s*(?:\n|$)))/si.exec(content) : null;
 
       const finalMatch = summaryMatch ?? fallbackMatch;
+
+      // Debug: log what was captured
+      console.log("Summary Match:", summaryMatch);
+      console.log("Fallback Match:", fallbackMatch);
+      console.log("Final Match:", finalMatch);
+      if (finalMatch) {
+        console.log("aboutMe captured:", finalMatch[1]);
+        console.log("aboutThem captured:", finalMatch[2]);
+      }
 
       if (finalMatch) {
         const aboutMe = finalMatch[1]!.trim();
