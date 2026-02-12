@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist, Playfair_Display } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -21,12 +21,26 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
 });
 
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair-display",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${geist.variable} ${plusJakartaSans.variable}`}>
-      <body >
+    <html
+      lang="es"
+      className={`${geist.variable} ${plusJakartaSans.variable} ${playfairDisplay.variable}`}
+    >
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
         <TRPCReactProvider>{children}</TRPCReactProvider>
       </body>
     </html>
