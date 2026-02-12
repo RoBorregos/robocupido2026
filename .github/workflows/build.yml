@@ -1,36 +1,38 @@
-name: Build Check
+name: Node.js build
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: ["main"]
   pull_request:
-    branches: [main, master, develop]
+    branches: ["main"]
+
+env: # Define environment variables at the workflow level
+  PERSONAL_ACCOUNT: roborregosteam
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run build
-        run: npm run build
+      - name: Expose github environment as shell variables
         env:
-          AUTH_SECRET: "build-time-secret-placeholder"
-          AUTH_DISCORD_ID: "build-discord-id-placeholder"
-          AUTH_DISCORD_SECRET: "build-discord-secret-placeholder"
-          DATABASE_URL: "postgresql://user:password@localhost:5432/db"
+          SECRETS_CONTEXT: ${{ toJson(secrets) }}
+          # VARS_CONTEXT: ${{ toJson(vars) }}
+        run: |
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          to_envs() { jq -r "to_entries[] | \"\(.key)<<$EOF\n\(.value)\n$EOF\n\""; }
+          # echo "$VARS_CONTEXT" | to_envs >> $GITHUB_ENV
+          echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
+      - run: npm install
+      - run: npm run build
