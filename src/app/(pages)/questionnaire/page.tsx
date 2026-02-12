@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
-import { Heart, Sparkles, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import Header from "../../_components/header";
 
 export default function QuestionnairePage() {
   const router = useRouter();
@@ -17,10 +17,11 @@ export default function QuestionnairePage() {
     carrera: "",
     semestre: "",
   });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [showErrors, setShowErrors] = useState(false);
 
   const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
 
-  // Redirect if user already completed their profile
   useEffect(() => {
     if (hasCompletedQuery.data?.completed) {
       router.push("/waiting");
@@ -36,6 +37,10 @@ export default function QuestionnairePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowErrors(true);
+    if (!isValid) {
+      return;
+    }
     submitProfile.mutate({
       age: parseInt(form.age),
       gender: form.gender,
@@ -50,264 +55,242 @@ export default function QuestionnairePage() {
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const isValid =
-    form.age &&
-    form.gender &&
-    form.instagram &&
-    form.lookingFor &&
-    form.carrera &&
-    form.semestre &&
-    (!needsPreferences || form.preferences);
+  const validationErrors = {
+    age: !form.age ? "La edad es requerida" : parseInt(form.age) < 18 ? "Debes ser mayor de 18 años" : null,
+    gender: !form.gender ? "El género es requerido" : null,
+    instagram: !form.instagram || form.instagram === "@" ? "El Instagram es requerido" : null,
+    lookingFor: !form.lookingFor ? "Selecciona qué buscas" : null,
+    carrera: !form.carrera ? "La carrera es requerida" : null,
+    semestre: !form.semestre ? "El semestre es requerido" : null,
+    preferences: needsPreferences && !form.preferences ? "Selecciona tus preferencias" : null,
+  };
 
-  // Show loading while checking profile status
+  const isValid = Object.values(validationErrors).every((error) => error === null);
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleAgeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Prevent 'e', 'E', '+', '-', '.' characters
+    if (["e", "E", "+", "-", "."].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    update("age", value);
+  };
+
   if (hasCompletedQuery.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
+      <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="h-3 w-3 animate-bounce rounded-full bg-pink-400"
+                className="bg-primary h-3 w-3 animate-bounce rounded-full"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}
           </div>
-          <span className="text-white/60">Cargando...</span>
+          <span className="text-rose-brown">Cargando...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-linear-to-br from-slate-950 via-purple-950 to-slate-950">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/4 -left-1/4 h-96 w-96 animate-pulse rounded-full bg-pink-500/20 blur-3xl" />
-        <div
-          className="absolute top-1/4 -right-1/4 h-96 w-96 animate-pulse rounded-full bg-purple-500/20 blur-3xl"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute -bottom-1/4 left-1/3 h-96 w-96 animate-pulse rounded-full bg-rose-500/20 blur-3xl"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
+    <div className="bg-background-light font-display text-wine min-h-screen transition-colors duration-300">
+      <Header />
 
-      {/* Header */}
-      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-opacity hover:opacity-80"
+      <main className="gradient-bg flex flex-col items-center px-4 sm:px-6 py-6 sm:py-10 pt-20 sm:pt-24">
+        <div className="w-full max-w-lg">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white border border-pink-100 p-5 sm:p-8 rounded-2xl shadow-xl"
           >
-            <div className="relative">
-              <Heart className="h-8 w-8 fill-pink-500 text-pink-500" />
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400" />
-            </div>
-            <div>
-              <h1 className="bg-linear-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-xl font-bold text-transparent">
-                RoBoCupido
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-wine leading-tight mb-3">
+                Cuéntanos sobre ti
               </h1>
-              <p className="text-xs text-white/50">Cuentanos de ti</p>
+              <p className="text-rose-brown font-medium text-sm sm:text-base">
+                Esta información nos ayudará a encontrar personas compatibles contigo.
+              </p>
             </div>
-          </Link>
-        </div>
-      </header>
 
-      {/* Form */}
-      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-lg space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl"
-        >
-          <div className="text-center">
-            <h2 className="mb-2 text-2xl font-bold text-white">
-              Sobre ti
-            </h2>
-            <p className="text-sm text-white/60">
-              Responde estas preguntas para encontrar tu match ideal
-            </p>
-          </div>
+            <div className="grid grid-cols-1 gap-4 sm:gap-5">
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Edad</label>
+                <input
+                  type="number"
+                  value={form.age}
+                  onChange={handleAgeChange}
+                  onKeyDown={handleAgeKeyDown}
+                  onBlur={() => handleBlur("age")}
+                  placeholder="Ej: 20"
+                  min={18}
+                  max={100}
+                  required
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.age) && validationErrors.age ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
+                />
+                {(showErrors || touched.age) && validationErrors.age && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.age}</p>
+                )}
+              </div>
 
-          {/* Age */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Edad
-            </label>
-            <input
-              type="number"
-              value={form.age}
-              onChange={(e) => update("age", e.target.value)}
-              placeholder="Ej: 20"
-              min={16}
-              max={100}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Género</label>
+                <select
+                  value={form.gender}
+                  onChange={(e) => update("gender", e.target.value)}
+                  onBlur={() => handleBlur("gender")}
+                  required
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.gender) && validationErrors.gender ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  <option value="Hombre" className="bg-white">Hombre</option>
+                  <option value="Mujer" className="bg-white">Mujer</option>
+                  <option value="No binario" className="bg-white">No binario</option>
+                  <option value="Otro" className="bg-white">Otro</option>
+                </select>
+                {(showErrors || touched.gender) && validationErrors.gender && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.gender}</p>
+                )}
+              </div>
 
-          {/* Gender */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Genero
-            </label>
-            <select
-              value={form.gender}
-              onChange={(e) => update("gender", e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            >
-              <option value="" disabled className="bg-slate-900">
-                Selecciona
-              </option>
-              <option value="Hombre" className="bg-slate-900">
-                Hombre
-              </option>
-              <option value="Mujer" className="bg-slate-900">
-                Mujer
-              </option>
-              <option value="No binario" className="bg-slate-900">
-                No binario
-              </option>
-              <option value="Otro" className="bg-slate-900">
-                Otro
-              </option>
-            </select>
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Instagram</label>
+                <div className="relative">
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-rose-brown font-bold text-sm sm:text-base">@</span>
+                  <input
+                    type="text"
+                    value={form.instagram.startsWith("@") ? form.instagram.slice(1) : form.instagram}
+                    onChange={(e) => update("instagram", "@" + e.target.value)}
+                    onBlur={() => handleBlur("instagram")}
+                    placeholder="tuusuario"
+                    required
+                    className={`w-full rounded-xl border-2 ${(showErrors || touched.instagram) && validationErrors.instagram ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 pl-8 sm:pl-10 pr-3 sm:pr-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
+                  />
+                </div>
+                {(showErrors || touched.instagram) && validationErrors.instagram && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.instagram}</p>
+                )}
+              </div>
 
-          {/* Instagram */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Instagram
-            </label>
-            <input
-              type="text"
-              value={form.instagram}
-              onChange={(e) => update("instagram", e.target.value)}
-              placeholder="Ej: @tuusuario"
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Carrera</label>
+                <input
+                  type="text"
+                  value={form.carrera}
+                  onChange={(e) => update("carrera", e.target.value)}
+                  onBlur={() => handleBlur("carrera")}
+                  placeholder="Ej: Ingeniería en Sistemas"
+                  required
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.carrera) && validationErrors.carrera ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
+                />
+                {(showErrors || touched.carrera) && validationErrors.carrera && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.carrera}</p>
+                )}
+              </div>
 
-          {/* Carrera */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Carrera
-            </label>
-            <input
-              type="text"
-              value={form.carrera}
-              onChange={(e) => update("carrera", e.target.value)}
-              placeholder="Ej: Ingeniería en Sistemas"
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/30 transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            />
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Semestre</label>
+                <select
+                  value={form.semestre}
+                  onChange={(e) => update("semestre", e.target.value)}
+                  onBlur={() => handleBlur("semestre")}
+                  required
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.semestre) && validationErrors.semestre ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((sem) => (
+                    <option key={sem} value={sem} className="bg-white">
+                      {sem}° Semestre
+                    </option>
+                  ))}
+                </select>
+                {(showErrors || touched.semestre) && validationErrors.semestre && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.semestre}</p>
+                )}
+              </div>
 
-          {/* Semestre */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Semestre
-            </label>
-            <select
-              value={form.semestre}
-              onChange={(e) => update("semestre", e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            >
-              <option value="" disabled className="bg-slate-900">
-                Selecciona
-              </option>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((sem) => (
-                <option key={sem} value={sem} className="bg-slate-900">
-                  {sem}° Semestre
-                </option>
-              ))}
-            </select>
-          </div>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Busco</label>
+                <select
+                  value={form.lookingFor}
+                  onChange={(e) => update("lookingFor", e.target.value)}
+                  onBlur={() => handleBlur("lookingFor")}
+                  required
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.lookingFor) && validationErrors.lookingFor ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  <option value="Pareja" className="bg-white">Pareja</option>
+                  <option value="Amigos" className="bg-white">Amigos</option>
+                  <option value="Algo casual" className="bg-white">Algo casual</option>
+                </select>
+                {(showErrors || touched.lookingFor) && validationErrors.lookingFor && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.lookingFor}</p>
+                )}
+              </div>
 
-          {/* Looking For */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">
-              Busco
-            </label>
-            <select
-              value={form.lookingFor}
-              onChange={(e) => update("lookingFor", e.target.value)}
-              required
-              className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
-            >
-              <option value="" disabled className="bg-slate-900">
-                Selecciona
-              </option>
-              <option value="Pareja" className="bg-slate-900">
-                Pareja
-              </option>
-              <option value="Amigos" className="bg-slate-900">
-                Amigos
-              </option>
-              <option value="Algo casual" className="bg-slate-900">
-                Algo casual
-              </option>
-            </select>
-          </div>
+              {needsPreferences && (
+                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Me interesan</label>
+                  <select
+                    value={form.preferences}
+                    onChange={(e) => update("preferences", e.target.value)}
+                    onBlur={() => handleBlur("preferences")}
+                    required
+                    className={`w-full rounded-xl border-2 ${(showErrors || touched.preferences) && validationErrors.preferences ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
+                  >
+                    <option value="" disabled className="bg-white">Selecciona</option>
+                    <option value="Hombres" className="bg-white">Hombres</option>
+                    <option value="Mujeres" className="bg-white">Mujeres</option>
+                    <option value="Indiferente" className="bg-white">Indiferente</option>
+                  </select>
+                  {(showErrors || touched.preferences) && validationErrors.preferences && (
+                    <p className="text-red-500 text-xs mt-1">{validationErrors.preferences}</p>
+                  )}
+                </div>
+              )}
+            </div>
 
-          {/* Preferences - only for Pareja / Algo casual */}
-          {needsPreferences && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-white/80">
-                Me interesan
-              </label>
-              <select
-                value={form.preferences}
-                onChange={(e) => update("preferences", e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white transition-all focus:border-pink-500/50 focus:ring-2 focus:ring-pink-500/20 focus:outline-none"
+            <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-pink-100">
+              <button
+                type="submit"
+                disabled={!isValid || submitProfile.isPending}
+                className="bg-primary shadow-primary/20 flex w-full items-center justify-center gap-2 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               >
-                <option value="" disabled className="bg-slate-900">
-                  Selecciona
-                </option>
-                <option value="Hombres" className="bg-slate-900">
-                  Hombres
-                </option>
-                <option value="Mujeres" className="bg-slate-900">
-                  Mujeres
-                </option>
-                <option value="Indiferente" className="bg-slate-900">
-                  Indiferente
-                </option>
-              </select>
+                {submitProfile.isPending ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    Continuar al chat
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </>
+                )}
+              </button>
+              {submitProfile.isError && (
+                <p className="mt-3 text-center text-xs sm:text-sm font-bold text-primary animate-pulse">
+                  Hubo un error, intenta de nuevo.
+                </p>
+              )}
             </div>
-          )}
+          </form>
+        </div>
+      </main>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!isValid || submitProfile.isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-pink-600 to-purple-600 px-6 py-4 text-sm font-bold text-white transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/25 disabled:opacity-50 disabled:hover:scale-100"
-          >
-            {submitProfile.isPending ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                Continuar al chat
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
-
-          {submitProfile.isError && (
-            <p className="text-center text-sm text-red-400">
-              Hubo un error, intenta de nuevo.
-            </p>
-          )}
-        </form>
-      </div>
+      <footer className="w-full py-4 sm:py-6 text-center opacity-40">
+        <p className="text-rose-brown text-xs uppercase tracking-widest font-bold">
+          Hecho con amor por Roborregos • 2024
+        </p>
+      </footer>
     </div>
   );
 }
