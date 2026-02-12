@@ -60,8 +60,11 @@ model User {
     preferences String?
     lookingFor  String?
     loveLanguage String?
+    carrera     String?
+    semestre    Int?
     aboutMe     String?
     aboutThem   String?
+    profileDescription String?
 
     aboutMeEmbedding   Unsupported("vector(1536)")?
     aboutThemEmbedding Unsupported("vector(1536)")?

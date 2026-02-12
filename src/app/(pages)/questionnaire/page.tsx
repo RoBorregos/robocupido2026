@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { ArrowRight } from "lucide-react";
@@ -10,11 +10,21 @@ export default function QuestionnairePage() {
   const router = useRouter();
   const [form, setForm] = useState({
     age: "",
-    genre: "",
+    gender: "",
     instagram: "",
     lookingFor: "",
     preferences: "",
+    carrera: "",
+    semestre: "",
   });
+
+  const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
+
+  useEffect(() => {
+    if (hasCompletedQuery.data?.completed) {
+      router.push("/waiting");
+    }
+  }, [hasCompletedQuery.data, router]);
 
   const submitProfile = api.user.submitProfile.useMutation({
     onSuccess: () => router.push("/chat"),
@@ -27,10 +37,12 @@ export default function QuestionnairePage() {
     e.preventDefault();
     submitProfile.mutate({
       age: parseInt(form.age),
-      genre: form.genre,
+      gender: form.gender,
       instagram: form.instagram,
       lookingFor: form.lookingFor,
       preferences: needsPreferences ? form.preferences : null,
+      carrera: form.carrera,
+      semestre: parseInt(form.semestre),
     });
   };
 
@@ -39,52 +51,54 @@ export default function QuestionnairePage() {
 
   const isValid =
     form.age &&
-    form.genre &&
+    form.gender &&
     form.instagram &&
     form.lookingFor &&
+    form.carrera &&
+    form.semestre &&
     (!needsPreferences || form.preferences);
 
+  if (hasCompletedQuery.isLoading) {
+    return (
+      <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="bg-primary h-3 w-3 animate-bounce rounded-full"
+                style={{ animationDelay: `${i * 150}ms` }}
+              />
+            ))}
+          </div>
+          <span className="text-rose-brown">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-background-light font-display text-wine relative min-h-screen transition-colors duration-300 overflow-x-hidden">
-      {/* Top Navigation */}
+    <div className="bg-background-light font-display text-wine min-h-screen transition-colors duration-300">
       <Header />
 
-      {/* Main Content */}
-      <main className="gradient-bg flex flex-col items-center justify-center px-6 py-10 min-h-[calc(100vh-80px)]">
-        <div className="max-w-[600px] w-full space-y-12">
-          {/* Progress Section */}
-          <div className="w-full flex flex-col gap-4 mb-2">
-            <div className="flex justify-between items-end">
-              <div>
-                <p className="text-primary font-bold text-sm uppercase tracking-widest mb-1">Tu Perfil</p>
-                <h3 className="text-wine text-2xl font-bold">Paso 1 de 1</h3>
-              </div>
-              <p className="text-wine text-lg font-medium opacity-60">100%</p>
-            </div>
-            <div className="h-3 w-full bg-pink-100/50 rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: "100%" }}></div>
-            </div>
-            <p className="text-rose-brown text-sm font-medium">Casi listo para encontrar tu match ideal...</p>
-          </div>
-
-          {/* Form Container */}
+      <main className="gradient-bg flex flex-col items-center px-4 sm:px-6 py-6 sm:py-10 pt-20 sm:pt-24">
+        <div className="w-full max-w-lg">
           <form
             onSubmit={handleSubmit}
-            className="group relative bg-white border border-pink-100 p-8 md:p-10 rounded-2xl shadow-xl transition-all duration-300"
+            className="bg-white border border-pink-100 p-5 sm:p-8 rounded-2xl shadow-xl"
           >
-            <div className="text-center mb-10">
-              <h1 className="font-serif text-4xl md:text-5xl text-wine leading-tight mb-4">
+            <div className="text-center mb-6 sm:mb-8">
+              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-wine leading-tight mb-3">
                 Cuéntanos sobre ti
               </h1>
-              <p className="text-rose-brown font-medium">
+              <p className="text-rose-brown font-medium text-sm sm:text-base">
                 Esta información nos ayudará a encontrar personas compatibles contigo.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-              {/* Age */}
-              <div className="space-y-2">
-                <label className="text-primary text-sm font-bold uppercase tracking-wider">Edad</label>
+            <div className="grid grid-cols-1 gap-4 sm:gap-5">
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Edad</label>
                 <input
                   type="number"
                   value={form.age}
@@ -93,18 +107,17 @@ export default function QuestionnairePage() {
                   min={16}
                   max={100}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm"
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
                 />
               </div>
 
-              {/* Genre */}
-              <div className="space-y-2">
-                <label className="text-primary text-sm font-bold uppercase tracking-wider">Género</label>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Género</label>
                 <select
-                  value={form.genre}
-                  onChange={(e) => update("genre", e.target.value)}
+                  value={form.gender}
+                  onChange={(e) => update("gender", e.target.value)}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
                 >
                   <option value="" disabled className="bg-white">Selecciona</option>
                   <option value="Hombre" className="bg-white">Hombre</option>
@@ -114,30 +127,57 @@ export default function QuestionnairePage() {
                 </select>
               </div>
 
-              {/* Instagram */}
-              <div className="space-y-2">
-                <label className="text-primary text-sm font-bold uppercase tracking-wider">Instagram</label>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Instagram</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-rose-brown font-bold">@</span>
+                  <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-rose-brown font-bold text-sm sm:text-base">@</span>
                   <input
                     type="text"
                     value={form.instagram.startsWith("@") ? form.instagram.slice(1) : form.instagram}
                     onChange={(e) => update("instagram", "@" + e.target.value)}
                     placeholder="tuusuario"
                     required
-                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 pl-10 pr-4 py-4 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm"
+                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 pl-8 sm:pl-10 pr-3 sm:pr-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
                   />
                 </div>
               </div>
 
-              {/* Looking For */}
-              <div className="space-y-2">
-                <label className="text-primary text-sm font-bold uppercase tracking-wider">Busco</label>
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Carrera</label>
+                <input
+                  type="text"
+                  value={form.carrera}
+                  onChange={(e) => update("carrera", e.target.value)}
+                  placeholder="Ej: Ingeniería en Sistemas"
+                  required
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Semestre</label>
+                <select
+                  value={form.semestre}
+                  onChange={(e) => update("semestre", e.target.value)}
+                  required
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
+                >
+                  <option value="" disabled className="bg-white">Selecciona</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((sem) => (
+                    <option key={sem} value={sem} className="bg-white">
+                      {sem}° Semestre
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Busco</label>
                 <select
                   value={form.lookingFor}
                   onChange={(e) => update("lookingFor", e.target.value)}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
                 >
                   <option value="" disabled className="bg-white">Selecciona</option>
                   <option value="Pareja" className="bg-white">Pareja</option>
@@ -146,15 +186,14 @@ export default function QuestionnairePage() {
                 </select>
               </div>
 
-              {/* Preferences */}
               {needsPreferences && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
-                  <label className="text-primary text-sm font-bold uppercase tracking-wider">Me interesan</label>
+                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <label className="text-primary text-xs sm:text-sm font-bold uppercase tracking-wider">Me interesan</label>
                   <select
                     value={form.preferences}
                     onChange={(e) => update("preferences", e.target.value)}
                     required
-                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-4 py-4 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer"
+                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
                   >
                     <option value="" disabled className="bg-white">Selecciona</option>
                     <option value="Hombres" className="bg-white">Hombres</option>
@@ -165,12 +204,11 @@ export default function QuestionnairePage() {
               )}
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-10 mt-10 border-t border-pink-100">
+            <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-pink-100">
               <button
                 type="submit"
                 disabled={!isValid || submitProfile.isPending}
-                className="bg-primary shadow-primary/20 flex w-full items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                className="bg-primary shadow-primary/20 flex w-full items-center justify-center gap-2 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               >
                 {submitProfile.isPending ? (
                   <>
@@ -180,12 +218,12 @@ export default function QuestionnairePage() {
                 ) : (
                   <>
                     Continuar al chat
-                    <ArrowRight className="h-5 w-5" />
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </>
                 )}
               </button>
               {submitProfile.isError && (
-                <p className="mt-4 text-center text-sm font-bold text-primary animate-pulse">
+                <p className="mt-3 text-center text-xs sm:text-sm font-bold text-primary animate-pulse">
                   Hubo un error, intenta de nuevo.
                 </p>
               )}
@@ -194,8 +232,7 @@ export default function QuestionnairePage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-8 text-center opacity-40">
+      <footer className="w-full py-4 sm:py-6 text-center opacity-40">
         <p className="text-rose-brown text-xs uppercase tracking-widest font-bold">
           Hecho con amor por Roborregos • 2024
         </p>
