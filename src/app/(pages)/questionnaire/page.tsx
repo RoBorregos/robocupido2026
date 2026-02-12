@@ -17,6 +17,8 @@ export default function QuestionnairePage() {
     carrera: "",
     semestre: "",
   });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [showErrors, setShowErrors] = useState(false);
 
   const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
 
@@ -35,6 +37,10 @@ export default function QuestionnairePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowErrors(true);
+    if (!isValid) {
+      return;
+    }
     submitProfile.mutate({
       age: parseInt(form.age),
       gender: form.gender,
@@ -49,14 +55,33 @@ export default function QuestionnairePage() {
   const update = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const isValid =
-    form.age &&
-    form.gender &&
-    form.instagram &&
-    form.lookingFor &&
-    form.carrera &&
-    form.semestre &&
-    (!needsPreferences || form.preferences);
+  const validationErrors = {
+    age: !form.age ? "La edad es requerida" : parseInt(form.age) < 18 ? "Debes ser mayor de 18 años" : null,
+    gender: !form.gender ? "El género es requerido" : null,
+    instagram: !form.instagram || form.instagram === "@" ? "El Instagram es requerido" : null,
+    lookingFor: !form.lookingFor ? "Selecciona qué buscas" : null,
+    carrera: !form.carrera ? "La carrera es requerida" : null,
+    semestre: !form.semestre ? "El semestre es requerido" : null,
+    preferences: needsPreferences && !form.preferences ? "Selecciona tus preferencias" : null,
+  };
+
+  const isValid = Object.values(validationErrors).every((error) => error === null);
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleAgeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Prevent 'e', 'E', '+', '-', '.' characters
+    if (["e", "E", "+", "-", "."].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    update("age", value);
+  };
 
   if (hasCompletedQuery.isLoading) {
     return (
@@ -102,13 +127,18 @@ export default function QuestionnairePage() {
                 <input
                   type="number"
                   value={form.age}
-                  onChange={(e) => update("age", e.target.value)}
+                  onChange={handleAgeChange}
+                  onKeyDown={handleAgeKeyDown}
+                  onBlur={() => handleBlur("age")}
                   placeholder="Ej: 20"
-                  min={16}
+                  min={18}
                   max={100}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.age) && validationErrors.age ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
                 />
+                {(showErrors || touched.age) && validationErrors.age && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.age}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -116,8 +146,9 @@ export default function QuestionnairePage() {
                 <select
                   value={form.gender}
                   onChange={(e) => update("gender", e.target.value)}
+                  onBlur={() => handleBlur("gender")}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.gender) && validationErrors.gender ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
                 >
                   <option value="" disabled className="bg-white">Selecciona</option>
                   <option value="Hombre" className="bg-white">Hombre</option>
@@ -125,6 +156,9 @@ export default function QuestionnairePage() {
                   <option value="No binario" className="bg-white">No binario</option>
                   <option value="Otro" className="bg-white">Otro</option>
                 </select>
+                {(showErrors || touched.gender) && validationErrors.gender && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.gender}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -135,11 +169,15 @@ export default function QuestionnairePage() {
                     type="text"
                     value={form.instagram.startsWith("@") ? form.instagram.slice(1) : form.instagram}
                     onChange={(e) => update("instagram", "@" + e.target.value)}
+                    onBlur={() => handleBlur("instagram")}
                     placeholder="tuusuario"
                     required
-                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 pl-8 sm:pl-10 pr-3 sm:pr-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
+                    className={`w-full rounded-xl border-2 ${(showErrors || touched.instagram) && validationErrors.instagram ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 pl-8 sm:pl-10 pr-3 sm:pr-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
                   />
                 </div>
+                {(showErrors || touched.instagram) && validationErrors.instagram && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.instagram}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -148,10 +186,14 @@ export default function QuestionnairePage() {
                   type="text"
                   value={form.carrera}
                   onChange={(e) => update("carrera", e.target.value)}
+                  onBlur={() => handleBlur("carrera")}
                   placeholder="Ej: Ingeniería en Sistemas"
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base"
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.carrera) && validationErrors.carrera ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine placeholder-rose-brown/40 transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm text-sm sm:text-base`}
                 />
+                {(showErrors || touched.carrera) && validationErrors.carrera && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.carrera}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -159,8 +201,9 @@ export default function QuestionnairePage() {
                 <select
                   value={form.semestre}
                   onChange={(e) => update("semestre", e.target.value)}
+                  onBlur={() => handleBlur("semestre")}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.semestre) && validationErrors.semestre ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
                 >
                   <option value="" disabled className="bg-white">Selecciona</option>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((sem) => (
@@ -169,6 +212,9 @@ export default function QuestionnairePage() {
                     </option>
                   ))}
                 </select>
+                {(showErrors || touched.semestre) && validationErrors.semestre && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.semestre}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -176,14 +222,18 @@ export default function QuestionnairePage() {
                 <select
                   value={form.lookingFor}
                   onChange={(e) => update("lookingFor", e.target.value)}
+                  onBlur={() => handleBlur("lookingFor")}
                   required
-                  className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
+                  className={`w-full rounded-xl border-2 ${(showErrors || touched.lookingFor) && validationErrors.lookingFor ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
                 >
                   <option value="" disabled className="bg-white">Selecciona</option>
                   <option value="Pareja" className="bg-white">Pareja</option>
                   <option value="Amigos" className="bg-white">Amigos</option>
                   <option value="Algo casual" className="bg-white">Algo casual</option>
                 </select>
+                {(showErrors || touched.lookingFor) && validationErrors.lookingFor && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.lookingFor}</p>
+                )}
               </div>
 
               {needsPreferences && (
@@ -192,14 +242,18 @@ export default function QuestionnairePage() {
                   <select
                     value={form.preferences}
                     onChange={(e) => update("preferences", e.target.value)}
+                    onBlur={() => handleBlur("preferences")}
                     required
-                    className="w-full rounded-xl border-2 border-pink-50 bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base"
+                    className={`w-full rounded-xl border-2 ${(showErrors || touched.preferences) && validationErrors.preferences ? "border-red-400" : "border-pink-50"} bg-[#FDF8F9]/50 px-3 sm:px-4 py-3 text-wine transition-all focus:border-primary/50 focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-sm appearance-none cursor-pointer text-sm sm:text-base`}
                   >
                     <option value="" disabled className="bg-white">Selecciona</option>
                     <option value="Hombres" className="bg-white">Hombres</option>
                     <option value="Mujeres" className="bg-white">Mujeres</option>
                     <option value="Indiferente" className="bg-white">Indiferente</option>
                   </select>
+                  {(showErrors || touched.preferences) && validationErrors.preferences && (
+                    <p className="text-red-500 text-xs mt-1">{validationErrors.preferences}</p>
+                  )}
                 </div>
               )}
             </div>

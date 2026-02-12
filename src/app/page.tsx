@@ -1,8 +1,7 @@
 import { HydrateClient } from "~/trpc/server";
 import HeartParticles from "./_components/heartParticles";
 import Header from "./_components/header";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import TermsModal from "./_components/termsModal";
 
 export default async function Home() {
 
@@ -39,13 +38,7 @@ export default async function Home() {
                 By Roborregos
               </p>
               <div className="pt-6">
-                <Link
-                  href="/questionnaire"
-                  className="bg-primary shadow-primary/30 mx-auto flex h-14 min-w-55 items-center justify-center gap-2 rounded-full px-8 text-sm font-bold text-white shadow-xl transition-all hover:translate-y-0.5 hover:shadow-2xl active:translate-y-0"
-                >
-                  Encuentra tu match
-                  <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
-                </Link>
+                <TermsModal />
               </div>
             </div>
           </section>

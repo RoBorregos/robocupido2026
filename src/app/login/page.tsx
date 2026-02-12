@@ -3,12 +3,19 @@ import { auth, signIn } from "~/server/auth";
 import Header from "../_components/header";
 import HeartParticles from "../_components/heartParticles";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await auth();
+  const { error } = await searchParams;
 
   if (session) {
     redirect("/questionnaire");
   }
+
+  const showEmailError = error === "AccessDenied";
 
   return (
     <div className="bg-background-light font-display text-wine relative min-h-screen transition-colors duration-300 overflow-x-hidden">
@@ -40,6 +47,15 @@ export default async function LoginPage() {
             <p className="mb-10 text-rose-brown font-medium">
               Inicia sesión con tu cuenta @tec.mx para encontrar tu match ideal
             </p>
+
+            {/* Error Message */}
+            {showEmailError && (
+              <div className="mb-6 rounded-lg bg-red-100 border border-red-300 p-4 text-red-700">
+                <p className="text-sm font-semibold">
+                  Solo puedes usar @tec.mx
+                </p>
+              </div>
+            )}
 
             {/* Google Sign In - Server Action */}
             <form
