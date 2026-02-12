@@ -288,7 +288,7 @@ export default function QuestionnairePage() {
 
       <footer className="w-full py-4 sm:py-6 text-center opacity-40">
         <p className="text-rose-brown text-xs uppercase tracking-widest font-bold">
-          Hecho con amor por Roborregos • 2024
+          Hecho con amor por Roborregos • 2026
         </p>
       </footer>
     </div>

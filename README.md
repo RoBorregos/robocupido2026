@@ -6,6 +6,7 @@
 
 | Name                       | Email                                                               | Github                                 | Role       |
 | -------------------------- | ------------------------------------------------------------------- | -------------------------------------- | ---------- |
+| Gerardo Fregoso Jimenez | [gerfregosoj@hotmail.com](mailto:gerfregosoj@hotmail.com) | [@GerardoFJ](https://github.com/GerardoFJ) | Programmer |
 | Gilberto Malagamba Montejo | [gilberto.malagamba@gmail.com](mailto:gilberto.malagamba@gmail.com) | [@GilMM27](https://github.com/GilMM27) | Programmer |
 | Hector Eduardo Tovar Mendoza | [h.tovarm07@gmail.com](mailto:h.tovarm07@gmail.com) | [@htovarm7](https://github.com/htovarm7) | Programmer |
 | Luis Benvenuto | [luiss.benvenuto@gmail.com](mailto:luiss.benvenuto@gmail.com) | [@biweep863](https://github.com/biweep863) | Programmer |
