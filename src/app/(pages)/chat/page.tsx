@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Send, Heart } from "lucide-react";
 import Header from "../../_components/header";
-import HeartParticles from "../../_components/heartParticles";
 
 interface Message {
   id: string;
@@ -21,21 +20,37 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chatMutation = api.llm.chat.useMutation();
-  const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
+  // Always fetch fresh data on mount to avoid stale cache redirects
+  const profileStatusQuery = api.user.getProfileStatus.useQuery(undefined, {
+    staleTime: 0, // Always consider data stale
+    refetchOnMount: "always", // Always refetch when component mounts
+  });
   const greetingQuery = api.llm.greeting.useQuery(undefined, {
-    enabled: messages.length === 0 && !hasCompletedQuery.data?.completed,
+    enabled: messages.length === 0 && profileStatusQuery.data?.hasFilledQuestionnaire && !profileStatusQuery.data?.hasCompletedChat,
   });
 
-  // Redirect if user already completed their profile
+  // Redirect based on profile status - only after fresh data is loaded
   useEffect(() => {
-    if (hasCompletedQuery.data?.completed) {
-      router.push("/waiting");
+    // Don't redirect while still fetching fresh data
+    if (profileStatusQuery.isFetching) return;
+    
+    if (profileStatusQuery.data) {
+      // If user hasn't filled questionnaire, redirect to questionnaire
+      if (!profileStatusQuery.data.hasFilledQuestionnaire) {
+        router.push("/questionnaire");
+      }
+      // If user has completed chat, redirect to waiting
+      else if (profileStatusQuery.data.hasCompletedChat) {
+        router.push("/waiting");
+      }
     }
-  }, [hasCompletedQuery.data, router]);
+  }, [profileStatusQuery.data, profileStatusQuery.isFetching, router]);
 
-  // Show bot greeting as first message
+  // Show bot greeting as first message - use ref to track if greeting was set
+  const greetingSetRef = useRef(false);
   useEffect(() => {
-    if (greetingQuery.data && messages.length === 0) {
+    if (greetingQuery.data && !greetingSetRef.current) {
+      greetingSetRef.current = true;
       setMessages([
         {
           id: "greeting",
@@ -44,15 +59,33 @@ const Chat = () => {
         },
       ]);
     }
-  }, [greetingQuery.data, messages.length]);
+  }, [greetingQuery.data]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Throttled scroll to bottom to prevent excessive reflows
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollToBottom = useCallback(() => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (messagesEndRef.current) {
+        // Use requestAnimationFrame for smoother scrolling
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        });
+      }
+    }, 100);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+    // Cleanup timeout on unmount
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [messages, scrollToBottom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,11 +135,6 @@ const Chat = () => {
 
   return (
     <div className="bg-background-light font-display text-wine relative flex h-screen w-full flex-col overflow-hidden transition-colors duration-300">
-      {/* Heart Particles Animation Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <HeartParticles />
-      </div>
-
       {/* Header */}
       <Header />
 
@@ -119,41 +147,48 @@ const Chat = () => {
       {/* Messages Area */}
       <div className="gradient-bg relative z-10 flex-1 overflow-y-auto px-4 py-6 pt-20">
         <div className="mx-auto max-w-3xl space-y-6">
-          {messages.map((message, index) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
+          {messages.map((message, index) => {
+            // Only animate the last 3 messages to reduce CPU usage
+            const isRecentMessage = index >= messages.length - 3;
+            const animationClass = isRecentMessage
+              ? "animate-in fade-in slide-in-from-bottom-4 duration-500"
+              : "";
+            
+            return (
               <div
-                className={`group relative max-w-[85%] md:max-w-[70%] ${
-                  message.role === "user" ? "order-2" : "order-1"
-                }`}
+                key={message.id}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} ${animationClass}`}
               >
-                {message.role === "assistant" && (
-                  <div className="absolute top-0 -left-12 hidden md:block">
-                    <div className="bg-primary rounded-full p-2">
-                      <Heart className="h-4 w-4 text-white" />
-                    </div>
-                  </div>
-                )}
-
                 <div
-                  className={`rounded-2xl px-5 py-3 ${
-                    message.role === "user"
-                      ? "bg-primary text-white shadow-lg"
-                      : "border border-pink-100 bg-white text-wine shadow-md"
+                  className={`group relative max-w-[85%] md:max-w-[70%] ${
+                    message.role === "user" ? "order-2" : "order-1"
                   }`}
                 >
-                  <p className="leading-relaxed">{message.content}</p>
-                </div>
+                  {message.role === "assistant" && (
+                    <div className="absolute top-0 -left-12 hidden md:block">
+                      <div className="bg-primary rounded-full p-2">
+                        <Heart className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                  )}
 
-                {message.role === "user" && (
-                  <div className="bg-primary/30 absolute inset-0 -z-10 rounded-2xl blur-xl" />
-                )}
+                  <div
+                    className={`rounded-2xl px-5 py-3 ${
+                      message.role === "user"
+                        ? "bg-primary text-white shadow-lg"
+                        : "border border-pink-100 bg-white text-wine shadow-md"
+                    }`}
+                  >
+                    <p className="leading-relaxed">{message.content}</p>
+                  </div>
+
+                  {message.role === "user" && (
+                    <div className="bg-primary/30 absolute inset-0 -z-10 rounded-2xl blur-xl" />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {chatMutation.isPending && (
             <div className="animate-in fade-in flex justify-start duration-300">

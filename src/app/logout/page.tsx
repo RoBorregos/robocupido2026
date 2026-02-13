@@ -3,7 +3,6 @@ import { auth, signOut } from "~/server/auth";
 import { Heart, LogOut } from "lucide-react";
 import Link from "next/link";
 import Header from "../_components/header";
-import HeartParticles from "../_components/heartParticles";
 
 export default async function LogoutPage() {
   const session = await auth();
@@ -14,11 +13,6 @@ export default async function LogoutPage() {
 
   return (
     <div className="bg-background-light font-display text-wine relative min-h-screen transition-colors duration-300 overflow-x-hidden">
-      {/* Heart Particles Animation Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <HeartParticles />
-      </div>
-
       {/* Header */}
       <Header />
 

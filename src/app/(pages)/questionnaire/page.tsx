@@ -8,6 +8,7 @@ import Header from "../../_components/header";
 
 export default function QuestionnairePage() {
   const router = useRouter();
+  const utils = api.useUtils();
   const [form, setForm] = useState({
     age: "",
     gender: "",
@@ -19,17 +20,44 @@ export default function QuestionnairePage() {
   });
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showErrors, setShowErrors] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasCompletedQuery = api.user.hasCompletedProfile.useQuery();
+  const profileStatusQuery = api.user.getProfileStatus.useQuery(undefined, {
+    // Don't refetch while we're submitting to avoid race conditions
+    enabled: !isSubmitting,
+  });
 
   useEffect(() => {
-    if (hasCompletedQuery.data?.completed) {
-      router.push("/waiting");
+    // Don't redirect if we're in the process of submitting
+    if (isSubmitting) return;
+    
+    if (profileStatusQuery.data) {
+      // If user has completed chat, redirect to waiting
+      if (profileStatusQuery.data.hasCompletedChat) {
+        router.push("/waiting");
+      }
+      // If user has filled questionnaire but not completed chat, redirect to chat
+      else if (profileStatusQuery.data.hasFilledQuestionnaire) {
+        router.push("/chat");
+      }
     }
-  }, [hasCompletedQuery.data, router]);
+  }, [profileStatusQuery.data, router, isSubmitting]);
 
   const submitProfile = api.user.submitProfile.useMutation({
-    onSuccess: () => router.push("/chat"),
+    onMutate: () => {
+      // Set submitting flag to prevent redirect race condition
+      setIsSubmitting(true);
+    },
+    onSuccess: async () => {
+      // Invalidate the profile status cache so chat page gets fresh data
+      await utils.user.getProfileStatus.invalidate();
+      // Navigate to chat after successful submission
+      router.push("/chat");
+    },
+    onError: () => {
+      // Reset submitting flag on error so user can retry
+      setIsSubmitting(false);
+    },
   });
 
   const needsPreferences =
@@ -83,7 +111,7 @@ export default function QuestionnairePage() {
     update("age", value);
   };
 
-  if (hasCompletedQuery.isLoading) {
+  if (profileStatusQuery.isLoading) {
     return (
       <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-3">
@@ -261,10 +289,10 @@ export default function QuestionnairePage() {
             <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-pink-100">
               <button
                 type="submit"
-                disabled={!isValid || submitProfile.isPending}
+                disabled={!isValid || submitProfile.isPending || isSubmitting}
                 className="bg-primary shadow-primary/20 flex w-full items-center justify-center gap-2 rounded-full px-6 sm:px-8 py-3 sm:py-4 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
               >
-                {submitProfile.isPending ? (
+                {(submitProfile.isPending || isSubmitting) ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Guardando...

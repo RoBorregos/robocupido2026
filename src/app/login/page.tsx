@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "~/server/auth";
 import Header from "../_components/header";
-import HeartParticles from "../_components/heartParticles";
 
 export default async function LoginPage({
   searchParams,
@@ -19,11 +18,6 @@ export default async function LoginPage({
 
   return (
     <div className="bg-background-light font-display text-wine relative min-h-screen transition-colors duration-300 overflow-x-hidden">
-      {/* Heart Particles Animation Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <HeartParticles />
-      </div>
-
       {/* Top Navigation */}
       <Header />
 

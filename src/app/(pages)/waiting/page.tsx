@@ -6,20 +6,26 @@ import { api } from "~/trpc/react";
 import { Heart, Sparkles, Calendar, Clock, LogOut } from "lucide-react";
 import Link from "next/link";
 import Header from "../../_components/header";
-import HeartParticles from "../../_components/heartParticles";
 
 const WaitingPage = () => {
   const router = useRouter();
+  const profileStatusQuery = api.user.getProfileStatus.useQuery();
   const profileQuery = api.user.getProfileDescription.useQuery();
 
   useEffect(() => {
-    // If user hasn't completed their profile, redirect to chat
-    if (profileQuery.data && !profileQuery.data.profileDescription) {
-      router.push("/chat");
+    if (profileStatusQuery.data) {
+      // If user hasn't filled questionnaire, redirect to questionnaire
+      if (!profileStatusQuery.data.hasFilledQuestionnaire) {
+        router.push("/questionnaire");
+      }
+      // If user hasn't completed chat, redirect to chat
+      else if (!profileStatusQuery.data.hasCompletedChat) {
+        router.push("/chat");
+      }
     }
-  }, [profileQuery.data, router]);
+  }, [profileStatusQuery.data, router]);
 
-  if (profileQuery.isLoading) {
+  if (profileStatusQuery.isLoading || profileQuery.isLoading) {
     return (
       <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-3">
@@ -40,21 +46,16 @@ const WaitingPage = () => {
 
   return (
     <div className="bg-background-light font-display text-wine relative min-h-screen w-full overflow-hidden transition-colors duration-300">
-      {/* Heart Particles Animation Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <HeartParticles />
-      </div>
-
       {/* Header */}
       <Header />
 
       {/* Main content */}
       <main className="gradient-bg relative z-10 flex flex-col items-center px-4 py-12 pt-24">
         <div className="w-full max-w-2xl space-y-8">
-          {/* Success animation */}
+          {/* Success animation - removed infinite animate-ping for better performance */}
           <div className="flex justify-center">
             <div className="relative">
-              <div className="bg-primary/30 absolute inset-0 animate-ping rounded-full" />
+              <div className="bg-primary/20 absolute inset-0 rounded-full scale-110" />
               <div className="bg-primary relative rounded-full p-6">
                 <Heart className="h-12 w-12 fill-white text-white" />
               </div>

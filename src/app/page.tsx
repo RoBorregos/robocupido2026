@@ -1,5 +1,5 @@
 import { HydrateClient } from "~/trpc/server";
-import HeartParticles from "./_components/heartParticles";
+import HeartParticlesWrapper from "./_components/heartParticlesWrapper";
 import Header from "./_components/header";
 import TermsModal from "./_components/termsModal";
 
@@ -10,7 +10,7 @@ export default async function Home() {
       <div className="bg-background-light font-display text-wine relative min-h-screen overflow-x-hidden transition-colors duration-300">
         {/* Heart Particles Animation Background */}
         <div className="pointer-events-none fixed inset-0 z-0">
-          <HeartParticles />
+          <HeartParticlesWrapper />
         </div>
 
         {/* Header/Navbar */}

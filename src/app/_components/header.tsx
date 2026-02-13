@@ -10,9 +10,11 @@ const Header = () => {
                         <Image
                             src="/black_logo.png"
                             alt="Roborregos Logo"
-                            fill
+                            width={40}
+                            height={40}
                             className="object-contain"
                             priority
+                            sizes="40px"
                         />
                     </div>
                     <h2 className="text-base md:text-lg font-extrabold tracking-tight text-wine transition-colors group-hover:text-primary whitespace-nowrap">
