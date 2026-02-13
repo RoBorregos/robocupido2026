@@ -84,8 +84,8 @@ aboutThem: "Busca a alguien que le gusten los videojuegos, que sea tranquila per
 const getGreeting = (lookingFor: string) => {
   const isFriends = lookingFor === "Amigos";
   return isFriends
-    ? "¡Hola! Soy RoBoCupido 💘 Estoy aqui para conocerte y ayudarte a encontrar amigos increibles. Cuentame, ¿como te describirias? Puedes empezar por lo que quieras: tu personalidad, que estudias, tus hobbies..."
-    : "¡Hola! Soy RoBoCupido 💘 Estoy aqui para conocerte y ayudarte a encontrar a tu match ideal. Cuentame, ¿como te describirias? Puedes empezar por lo que quieras: tu personalidad, que estudias, tus hobbies...";
+    ? "¡Hola! Soy RoBoCupido 💘 Estoy aqui para conocerte y ayudarte a encontrar amigos increibles. Cuentame, ¿como te describirias? Puedes empezar por lo que quieras: tu personalidad, que estudias, tus hobbies...\n\n_(Cuando quieras terminar, solo escribe \"terminar\")_"
+    : "¡Hola! Soy RoBoCupido 💘 Estoy aqui para conocerte y ayudarte a encontrar a tu match ideal. Cuentame, ¿como te describirias? Puedes empezar por lo que quieras: tu personalidad, que estudias, tus hobbies...\n\n_(Cuando quieras terminar, solo escribe \"terminar\")_";
 };
 
 export const llmRouter = createTRPCRouter({
