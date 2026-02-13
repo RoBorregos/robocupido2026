@@ -219,7 +219,8 @@ const Chat = () => {
               </button>
             </div>
             <p className="text-rose-brown/60 mt-3 text-center text-xs">
-              Tus respuestas nos ayudarán a encontrar tu match perfecto
+              Tus respuestas nos ayudarán a encontrar tu match perfecto •{" "}
+              <span className="font-medium">Escribe &quot;terminar&quot; cuando quieras finalizar</span>
             </p>
           </form>
         )}
