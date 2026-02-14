@@ -14,19 +14,30 @@ export default async function Home() {
   const session = await auth();
   
   if (session?.user) {
-    // User is authenticated, check their profile status
+    // User is authenticated, check their profile status and matches
     const user = await db.user.findUnique({
       where: { id: session.user.id },
       select: {
         profileDescription: true,
+        matchesReceived: {
+          select: { id: true },
+          take: 1,
+        },
       },
     });
     
     const hasCompletedProfile = !!user?.profileDescription;
+    const hasMatches = (user?.matchesReceived?.length ?? 0) > 0;
     
     if (hasCompletedProfile) {
-      // User completed their profile - redirect to waiting/profile page
-      redirect("/waiting");
+      // User completed their profile
+      if (hasMatches) {
+        // User has matches - redirect to matches page
+        redirect("/matches");
+      } else {
+        // User has no matches yet - redirect to waiting page
+        redirect("/waiting");
+      }
     } else if (REGISTRATION_CLOSED) {
       // Registration is closed and user didn't complete profile
       redirect("/registration-ended");

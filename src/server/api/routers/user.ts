@@ -80,4 +80,48 @@ export const userRouter = createTRPCRouter({
         data: input,
       });
     }),
+
+  // Get user's matches
+  getMatches: protectedProcedure.query(async ({ ctx }) => {
+    const matches = await ctx.db.match.findMany({
+      where: { userId: ctx.session.user.id },
+      orderBy: { rank: "asc" },
+      include: {
+        matched: {
+          select: {
+            id: true,
+            name: true,
+            instagram: true,
+            age: true,
+            carrera: true,
+            lookingFor: true,
+            profileDescription: true,
+          },
+        },
+      },
+    });
+
+    return matches.map((match) => ({
+      id: match.id,
+      rank: match.rank,
+      score: match.score,
+      matchedUser: {
+        id: match.matched.id,
+        name: match.matched.name,
+        instagram: match.matched.instagram,
+        age: match.matched.age,
+        carrera: match.matched.carrera,
+        lookingFor: match.matched.lookingFor,
+        profileDescription: match.matched.profileDescription,
+      },
+    }));
+  }),
+
+  // Check if user has matches
+  hasMatches: protectedProcedure.query(async ({ ctx }) => {
+    const matchCount = await ctx.db.match.count({
+      where: { userId: ctx.session.user.id },
+    });
+    return { hasMatches: matchCount > 0, count: matchCount };
+  }),
 });

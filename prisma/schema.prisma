@@ -68,4 +68,25 @@ model User {
 
     aboutMeEmbedding   Unsupported("vector(1536)")?
     aboutThemEmbedding Unsupported("vector(1536)")?
+
+    // Matches where this user is the one receiving matches
+    matchesReceived Match[] @relation("UserMatches")
+    // Matches where this user is the matched person
+    matchesGiven    Match[] @relation("MatchedUser")
+}
+
+model Match {
+    id          String   @id @default(cuid())
+    userId      String
+    matchedId   String
+    score       Float    // Similarity score (0-100 percentage)
+    rank        Int      // 1st, 2nd, 3rd, 4th match
+    createdAt   DateTime @default(now())
+
+    user        User     @relation("UserMatches", fields: [userId], references: [id], onDelete: Cascade)
+    matched     User     @relation("MatchedUser", fields: [matchedId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, matchedId])
+    @@index([userId])
+    @@index([matchedId])
 }

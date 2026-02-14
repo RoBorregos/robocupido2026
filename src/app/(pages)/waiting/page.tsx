@@ -11,8 +11,15 @@ const WaitingPage = () => {
   const router = useRouter();
   const profileStatusQuery = api.user.getProfileStatus.useQuery();
   const profileQuery = api.user.getProfileDescription.useQuery();
+  const hasMatchesQuery = api.user.hasMatches.useQuery();
 
   useEffect(() => {
+    // Redirect to matches page if user has matches
+    if (hasMatchesQuery.data?.hasMatches) {
+      router.push("/matches");
+      return;
+    }
+
     if (profileStatusQuery.data) {
       // If user hasn't filled questionnaire, redirect to questionnaire
       if (!profileStatusQuery.data.hasFilledQuestionnaire) {
@@ -23,9 +30,9 @@ const WaitingPage = () => {
         router.push("/chat");
       }
     }
-  }, [profileStatusQuery.data, router]);
+  }, [profileStatusQuery.data, hasMatchesQuery.data, router]);
 
-  if (profileStatusQuery.isLoading || profileQuery.isLoading) {
+  if (profileStatusQuery.isLoading || profileQuery.isLoading || hasMatchesQuery.isLoading) {
     return (
       <div className="bg-background-light font-display text-wine flex min-h-screen items-center justify-center">
         <div className="flex items-center gap-3">

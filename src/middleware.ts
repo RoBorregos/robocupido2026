@@ -36,5 +36,6 @@ export const config = {
     "/avatar/:path*",
     "/logout/:path*",
     "/registration-ended/:path*",
+    "/matches/:path*",
   ],
 };
