@@ -1,9 +1,40 @@
+import { redirect } from "next/navigation";
 import { HydrateClient } from "~/trpc/server";
+import { auth } from "~/server/auth";
+import { db } from "~/server/db";
 import HeartParticlesWrapper from "./_components/heartParticlesWrapper";
 import Header from "./_components/header";
 import TermsModal from "./_components/termsModal";
 
+// Registration is closed
+const REGISTRATION_CLOSED = true;
+
 export default async function Home() {
+  // Check if user is authenticated
+  const session = await auth();
+  
+  if (session?.user) {
+    // User is authenticated, check their profile status
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        profileDescription: true,
+      },
+    });
+    
+    const hasCompletedProfile = !!user?.profileDescription;
+    
+    if (hasCompletedProfile) {
+      // User completed their profile - redirect to waiting/profile page
+      redirect("/waiting");
+    } else if (REGISTRATION_CLOSED) {
+      // Registration is closed and user didn't complete profile
+      redirect("/registration-ended");
+    } else {
+      // Registration is open - redirect to questionnaire
+      redirect("/questionnaire");
+    }
+  }
 
   return (
     <HydrateClient>
