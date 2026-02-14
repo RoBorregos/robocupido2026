@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Heart, Calendar, ArrowRight } from "lucide-react";
 import { api } from "~/trpc/react";
 import Header from "../../_components/header";
@@ -84,13 +85,13 @@ export default function RegistrationEndedPage() {
           </div>
 
           {/* Back to Home */}
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-primary hover:text-wine transition-colors font-medium"
           >
             <span>Volver al inicio</span>
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
       </main>
     </div>
